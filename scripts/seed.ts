@@ -55,7 +55,7 @@ const seedDatabase = async () => {
   // 2. Generate 50 Books (5 per category)
   console.log('Inserting authors and books...');
   
-  const generateBooksForCategory = async (category, count) => {
+  const generateBooksForCategory = async (category: any, count: number) => {
     for (let i = 0; i < count; i++) {
       // Create an author
       const authorName = faker.person.fullName();

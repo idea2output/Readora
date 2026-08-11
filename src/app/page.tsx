@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button"
 import { SearchInput } from "@/components/ui/search-input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { BookOpen, Sparkles, Building2, Library } from "lucide-react"
-import { getFeaturedBooks } from "@/lib/db/books"
+import { getFeaturedBooks, getBooksByCategory } from "@/lib/db/books"
 
 export default async function Home() {
   const featuredBooks = await getFeaturedBooks(6) || [];
+  const sacredTexts = await getBooksByCategory('sacred-texts-religion', 6) || [];
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -76,7 +77,7 @@ export default async function Home() {
                 <Card className="h-full overflow-hidden hover:border-primary/50 transition-colors">
                   <div className="aspect-[2/3] relative bg-muted">
                     {book.cover_url ? (
-                      <Image src={book.cover_url} alt={book.title} fill className="object-cover" />
+                      <Image src={book.cover_url} alt={book.title} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw" className="object-cover" />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center text-muted-foreground font-serif p-4 text-center text-sm">
                         {book.title}
@@ -92,6 +93,43 @@ export default async function Home() {
             )) : (
               <div className="col-span-full text-center py-12 text-muted-foreground">
                 No featured books available yet.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Sacred Texts & Religion Section */}
+      <section className="w-full py-12 md:py-16 bg-muted/10">
+        <div className="container px-4 md:px-6 mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="font-serif text-3xl font-bold tracking-tight">Sacred Texts & Religion</h2>
+            <Link href="/categories/sacred-texts-religion" className="text-sm font-medium text-primary hover:underline">
+              View all sacred texts →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {sacredTexts.length > 0 ? sacredTexts.map((book: any) => (
+              <Link key={book.id} href={`/books/${book.slug}`}>
+                <Card className="h-full overflow-hidden hover:border-primary/50 transition-colors">
+                  <div className="aspect-[2/3] relative bg-muted">
+                    {book.cover_url ? (
+                      <Image src={book.cover_url} alt={book.title} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw" className="object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-muted-foreground font-serif p-4 text-center text-sm">
+                        {book.title}
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-bold line-clamp-1 text-sm">{book.title}</h3>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{book.authors?.name}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            )) : (
+              <div className="col-span-full text-center py-12 text-muted-foreground">
+                No religious texts available yet.
               </div>
             )}
           </div>

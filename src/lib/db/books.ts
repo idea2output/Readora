@@ -58,7 +58,31 @@ export async function searchBooks(query: string, page = 1, limit = 12) {
   
   if (error) {
     console.error('Supabase Error (searchBooks):', error);
-    return { books: [], count: 0 };
+    return { data: [], count: 0 };
   }
-  return { books: data, count };
+  return { data, count };
+}
+
+export async function getBooksByCategory(categorySlug: string, limit = 6) {
+  const supabase = await createClient();
+  
+  // We need to join through book_categories
+  const { data, error } = await supabase
+    .from('books')
+    .select(`
+      id, title, slug, cover_url, author_id, genre, description,
+      authors ( name, slug ),
+      book_categories!inner (
+        categories!inner ( slug )
+      )
+    `)
+    .eq('status', 'published')
+    .eq('book_categories.categories.slug', categorySlug)
+    .limit(limit);
+
+  if (error) {
+    console.error('Supabase Error (getBooksByCategory):', error);
+    return [];
+  }
+  return data;
 }

@@ -13,11 +13,12 @@ export const metadata = {
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { q?: string; page?: string; category?: string }
+  searchParams: Promise<{ q?: string; page?: string; category?: string }>
 }) {
-  const query = searchParams.q || '';
-  const page = parseInt(searchParams.page || '1');
-  const categoryId = searchParams.category || '';
+  const resolvedSearchParams = await searchParams;
+  const query = resolvedSearchParams.q || '';
+  const page = parseInt(resolvedSearchParams.page || '1');
+  const categoryId = resolvedSearchParams.category || '';
 
   const { books, count } = await searchBooks(query, page);
   const categories = await getCategories();
@@ -55,7 +56,7 @@ export default async function SearchPage({
                 <Card className="h-full overflow-hidden hover:border-primary/50 transition-colors">
                   <div className="aspect-[2/3] relative bg-muted">
                     {book.cover_url ? (
-                      <Image src={book.cover_url} alt={book.title} fill className="object-cover" />
+                      <Image src={book.cover_url} alt={book.title} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw" className="object-cover" />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center p-4 text-center text-muted-foreground font-serif">
                         {book.title}

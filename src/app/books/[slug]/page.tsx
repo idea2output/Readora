@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const book = await getBookBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params;
+  const book = await getBookBySlug(resolvedParams.slug);
   if (!book) return {};
   
   return {
@@ -19,8 +20,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function BookPage({ params }: { params: { slug: string } }) {
-  const book = await getBookBySlug(params.slug);
+export default async function BookPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params;
+  const book = await getBookBySlug(resolvedParams.slug);
   
   if (!book) {
     notFound();
@@ -33,11 +35,13 @@ export default async function BookPage({ params }: { params: { slug: string } })
         <div className="space-y-6">
           <div className="aspect-[2/3] relative rounded-xl overflow-hidden shadow-2xl bg-muted">
             {book.cover_url && (
-              <Image src={book.cover_url} alt={book.title} fill className="object-cover" priority />
+              <Image src={book.cover_url} alt={book.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" priority />
             )}
           </div>
           <div className="space-y-3">
-            <Button size="lg" className="w-full">Start Reading</Button>
+            <Link href={`/read/${book.slug}`} className="block w-full">
+              <Button size="lg" className="w-full">Start Reading</Button>
+            </Link>
             <Button size="lg" variant="secondary" className="w-full">Add to Library</Button>
           </div>
         </div>

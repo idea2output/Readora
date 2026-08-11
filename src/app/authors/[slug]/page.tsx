@@ -4,8 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const author = await getAuthorBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params;
+  const author = await getAuthorBySlug(resolvedParams.slug);
   if (!author) return {};
   
   return {
@@ -14,8 +15,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function AuthorPage({ params }: { params: { slug: string } }) {
-  const author = await getAuthorBySlug(params.slug);
+export default async function AuthorPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params;
+  const author = await getAuthorBySlug(resolvedParams.slug);
   
   if (!author) {
     notFound();
@@ -51,7 +53,7 @@ export default async function AuthorPage({ params }: { params: { slug: string } 
                 <Card className="h-full overflow-hidden hover:border-primary/50 transition-colors">
                   <div className="aspect-[2/3] relative bg-muted">
                     {book.cover_url ? (
-                      <Image src={book.cover_url} alt={book.title} fill className="object-cover" />
+                      <Image src={book.cover_url} alt={book.title} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw" className="object-cover" />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center p-4 text-center text-muted-foreground font-serif">
                         {book.title}

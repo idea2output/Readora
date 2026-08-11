@@ -81,6 +81,29 @@
     --input: 250 24% 20%;
     --ring: 270 100% 65%;
   }
+
+  .sepia {
+    --background: 40 40% 96%; /* Cream/off-white */
+    --foreground: 30 20% 25%; /* Dark brown */
+    --card: 40 30% 92%;
+    --card-foreground: 30 20% 25%;
+    --popover: 40 40% 96%;
+    --popover-foreground: 30 20% 25%;
+    --primary: 30 40% 40%;
+    --primary-foreground: 40 40% 96%;
+    --secondary: 40 20% 85%;
+    --secondary-foreground: 30 30% 30%;
+    --muted: 40 20% 85%;
+    --muted-foreground: 30 10% 45%;
+    --accent: 40 30% 88%;
+    --accent-foreground: 30 20% 25%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 40 40% 96%;
+    --border: 40 20% 80%;
+    --input: 40 20% 80%;
+    --ring: 30 40% 40%;
+    --radius: 1.5rem;
+  }
 }
 
 @layer base {

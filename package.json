@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@faker-js/faker": "^10.5.0",
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-popover": "^1.1.23",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "clsx": "^2.1.1",
