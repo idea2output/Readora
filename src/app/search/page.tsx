@@ -20,7 +20,7 @@ export default async function SearchPage({
   const page = parseInt(resolvedSearchParams.page || '1');
   const categoryId = resolvedSearchParams.category || '';
 
-  const { books, count } = await searchBooks(query, page);
+  const { data: books, count } = await searchBooks(query, page);
   const categories = await getCategories();
 
   return (
