@@ -24,26 +24,70 @@ function saveSyncedBookId(id) {
   }
 }
 
-// Split HTML into rough chapters
-function splitIntoChapters(html) {
-  if (!html) return [];
-  const parts = html.split(/<h[23][^>]*>/i);
-  if (parts.length > 2) {
-    const chapters = [];
-    for (let i = 1; i < parts.length; i++) {
-      const closeIdx = parts[i].indexOf('</h');
-      let title = `Chapter ${i}`;
-      let content = parts[i];
-      if (closeIdx > -1) {
-        title = parts[i].substring(0, closeIdx).replace(/<[^>]+>/g, '').trim();
-        content = parts[i].substring(parts[i].indexOf('>', closeIdx) + 1);
+// Robust chapter splitter supporting both HTML and Plain Text
+function splitIntoChapters(content, isHtml = true) {
+  if (!content) return [];
+  
+  if (isHtml) {
+    const parts = content.split(/<h[23][^>]*>/i);
+    if (parts.length > 2) {
+      const chapters = [];
+      for (let i = 1; i < parts.length; i++) {
+        const closeIdx = parts[i].indexOf('</h');
+        let title = `Chapter ${i}`;
+        let body = parts[i];
+        if (closeIdx > -1) {
+          title = parts[i].substring(0, closeIdx).replace(/<[^>]+>/g, '').trim();
+          body = parts[i].substring(parts[i].indexOf('>', closeIdx) + 1);
+        }
+        if (title.length > 60 || !title) title = `Chapter ${i}`;
+        chapters.push({ title, content: body.trim() });
       }
-      if (title.length > 50) title = `Chapter ${i}`;
-      chapters.push({ title, content: content.trim() });
+      return chapters;
     }
-    return chapters;
   }
-  return [{ title: "Full Text", content: html }];
+
+  // Plain text or fallback formatting
+  // Convert plain text double line breaks to HTML paragraphs
+  const cleanText = content.replace(/\r\n/g, '\n');
+  const rawChapters = cleanText.split(/\n(?=(?:CHAPTER|Chapter|Book|BOOK|PART|Part)\s+[0-9IVXLC]+)/i);
+
+  if (rawChapters.length > 1) {
+    return rawChapters.map((chText, idx) => {
+      const lines = chText.trim().split('\n');
+      const title = lines[0].substring(0, 60).trim() || `Chapter ${idx + 1}`;
+      const bodyText = lines.slice(1).join('\n\n');
+      const htmlBody = bodyText
+        .split(/\n\s*\n/)
+        .filter(p => p.trim())
+        .map(p => `<p class="mb-4 leading-relaxed">${p.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`)
+        .join('\n');
+      return { title, content: htmlBody || `<p>${chText.trim()}</p>` };
+    });
+  }
+
+  // Fallback: split long text into ~10k character readable chapters
+  const paragraphs = cleanText.split(/\n\s*\n/).filter(p => p.trim());
+  const chapters = [];
+  let currentChunk = [];
+  let currentLen = 0;
+  let chNum = 1;
+
+  for (const p of paragraphs) {
+    currentChunk.push(`<p class="mb-4 leading-relaxed">${p.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`);
+    currentLen += p.length;
+    if (currentLen >= 8000) {
+      chapters.push({ title: `Chapter ${chNum}`, content: currentChunk.join('\n') });
+      chNum++;
+      currentChunk = [];
+      currentLen = 0;
+    }
+  }
+  if (currentChunk.length > 0) {
+    chapters.push({ title: `Chapter ${chNum}`, content: currentChunk.join('\n') });
+  }
+
+  return chapters.length > 0 ? chapters : [{ title: "Full Text", content: `<p>${content}</p>` }];
 }
 
 async function startWorker() {
@@ -54,7 +98,6 @@ async function startWorker() {
   while (true) {
     const syncedIds = getSyncedBookIds();
 
-    // Find one book that needs syncing
     let query = supabase.from('books').select('id, title, source_url').limit(1);
     if (syncedIds.length > 0) {
       query = query.not('id', 'in', `(${syncedIds.join(',')})`);
@@ -64,7 +107,7 @@ async function startWorker() {
 
     if (error) {
       console.error("❌ DB Error:", error.message);
-      await sleep(10000); // Wait 10s on error
+      await sleep(10000);
       continue;
     }
 
@@ -77,34 +120,67 @@ async function startWorker() {
     const book = books[0];
     console.log(`\n⏳ [SYNCING] ${book.title}`);
     
-    // Fallback URL if we need to derive the HTML link
-    let contentUrl = book.source_url;
-    if (contentUrl && contentUrl.includes('ebooks/')) {
-       const gutendexId = contentUrl.split('/').pop();
-       contentUrl = `https://www.gutenberg.org/files/${gutendexId}/${gutendexId}-h/${gutendexId}-h.htm`;
+    let gutendexId = null;
+    if (book.source_url && book.source_url.includes('ebooks/')) {
+       gutendexId = book.source_url.split('/').pop().replace(/[^0-9]/g, '');
     }
 
-    if (!contentUrl) {
-      console.log(`⏭️  No source URL found for ${book.title}, skipping.`);
+    if (!gutendexId) {
+      console.log(`⏭️  No Gutenberg ID found for ${book.title}, skipping.`);
       saveSyncedBookId(book.id);
       continue;
     }
 
-    try {
-      console.log(`   Downloading real content from Gutenberg...`);
-      const res = await fetch(contentUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-        }
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      
-      const rawContent = await res.text();
-      const newChapters = splitIntoChapters(rawContent);
+    // Reliable candidate URLs in order of preference
+    const candidateUrls = [
+      { url: `https://www.gutenberg.org/cache/epub/${gutendexId}/pg${gutendexId}.html.utf8`, type: 'html' },
+      { url: `https://www.gutenberg.org/ebooks/${gutendexId}.html.images`, type: 'html' },
+      { url: `https://www.gutenberg.org/cache/epub/${gutendexId}/pg${gutendexId}.txt`, type: 'text' },
+      { url: `https://www.gutenberg.org/ebooks/${gutendexId}.txt.utf-8`, type: 'text' }
+    ];
 
-      // Limit to 50 chapters to avoid Payload Too Large errors
+    let downloadedContent = null;
+    let contentType = 'html';
+
+    for (const item of candidateUrls) {
+      try {
+        console.log(`   Trying fetch from: ${item.url}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+        const res = await fetch(item.url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,text/plain,application/xhtml+xml;q=0.9,*/*;q=0.8',
+          },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          downloadedContent = await res.text();
+          contentType = item.type;
+          console.log(`   ⚡ Download successful! (${(downloadedContent.length / 1024).toFixed(1)} KB)`);
+          break;
+        }
+      } catch (e) {
+        console.log(`   ⚠️ Failed (${item.url.split('/').pop()}): ${e.message}`);
+      }
+    }
+
+    if (!downloadedContent) {
+      console.error(`❌ All fetch attempts failed for ${book.title}. Skipping for now.`);
+      saveSyncedBookId(book.id);
+      console.log(`\n💤 Sleeping 15 seconds...`);
+      await sleep(15000);
+      continue;
+    }
+
+    try {
+      const isHtml = contentType === 'html';
+      const newChapters = splitIntoChapters(downloadedContent, isHtml);
+
+      // Limit to 50 chapters
       const safeChapters = newChapters.slice(0, 50).map((ch, idx) => ({
         book_id: book.id,
         title: ch.title,
@@ -112,29 +188,27 @@ async function startWorker() {
         content: ch.content
       }));
 
-      // 1. Delete old dummy chapters
+      // 1. Delete old placeholder/dummy chapters
       await supabase.from('chapters').delete().eq('book_id', book.id);
 
-      // 2. Insert new real chapters
+      // 2. Insert real chapters
       const { error: insertErr } = await supabase.from('chapters').insert(safeChapters);
       
       if (insertErr) {
         console.error("❌ Failed to insert real chapters:", insertErr.message);
       } else {
-        console.log(`✅ Successfully replaced with ${safeChapters.length} real chapters!`);
+        console.log(`✅ Successfully saved ${safeChapters.length} real chapters for "${book.title}"!`);
         saveSyncedBookId(book.id);
       }
 
     } catch (err) {
-      console.error(`❌ Fetch failed for ${book.title}:`, err.message);
-      console.log("   Gutenberg might be rate-limiting. Will skip for now.");
-      // Even if it fails due to 404s on that specific URL pattern, we should mark as synced to prevent infinite loops on a bad book URL
+      console.error(`❌ Parsing/saving failed for ${book.title}:`, err.message);
       saveSyncedBookId(book.id);
     }
 
-    // SAFE TIME GAP (45 seconds)
-    console.log(`\n💤 Sleeping for 45 seconds to respect Gutenberg's servers...`);
-    await sleep(45000);
+    // Reduced gap to 15 seconds since we are using fast endpoints now
+    console.log(`\n💤 Sleeping for 15 seconds before next book...`);
+    await sleep(15000);
   }
 }
 
