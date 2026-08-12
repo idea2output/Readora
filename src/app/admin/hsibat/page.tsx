@@ -399,22 +399,25 @@ export default function AdminHsibatPage() {
         </div>
         <div className="relative z-10 max-w-3xl space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" /> Commercial Admin Control Suite
+            <Sparkles className="w-3.5 h-3.5" /> Literary Harbor Master Governance
           </div>
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
-            Readora Administration
+            Literary Harbor Control Suite
           </h1>
           <p className="text-white/80 text-sm md:text-base">
-            Book curation & soft delete, user role management, commercial subscriptions, AI RAG vector parameters, & audit logging.
+            Rights case management, takedown review, academic metadata, user roles, subscriptions, & audit logging.
           </p>
         </div>
       </div>
 
       {/* Navigation Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 rounded-full bg-muted p-1 gap-1">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 rounded-full bg-muted p-1 gap-1">
           <TabsTrigger value="books" className="rounded-full text-xs font-bold gap-1.5">
             <BookOpen className="w-3.5 h-3.5" /> Ingestion & Books
+          </TabsTrigger>
+          <TabsTrigger value="rights_cases" className="rounded-full text-xs font-bold gap-1.5 text-amber-600 dark:text-amber-400">
+            <ShieldAlert className="w-3.5 h-3.5" /> Takedowns & Cases
           </TabsTrigger>
           <TabsTrigger value="users" className="rounded-full text-xs font-bold gap-1.5">
             <Users className="w-3.5 h-3.5" /> Users & Roles
@@ -661,6 +664,49 @@ export default function AdminHsibatPage() {
               </Card>
             </div>
           </div>
+        </TabsContent>
+
+        {/* TAB: RIGHTS CASES & TAKEDOWN QUEUE */}
+        <TabsContent value="rights_cases">
+          <Card className="rounded-3xl shadow-xl border-amber-500/20">
+            <CardHeader className="p-6 border-b flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-xl font-bold flex items-center gap-2 text-amber-800 dark:text-amber-300">
+                  <ShieldAlert className="w-5 h-5 text-amber-500" /> Copyright Takedown & Rights Case Queue
+                </CardTitle>
+                <CardDescription>
+                  Review formal rights notifications, claims, and counter-notices (Cases format: LH-RIGHTS-2026-XXXXXX).
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-900 dark:text-amber-200">
+                Notice: When a copyright report is submitted, the title is automatically placed under temporary restriction pending reviewer decision.
+              </div>
+
+              <div className="space-y-3">
+                <div className="p-4 rounded-2xl border bg-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-amber-500 text-white font-mono text-[10px]">LH-RIGHTS-2026-849201</Badge>
+                      <Badge variant="outline" className="text-[10px]">RECEIVED</Badge>
+                    </div>
+                    <h4 className="font-bold text-sm mt-1">Claim: Incorrect Public Domain Claim</h4>
+                    <p className="text-muted-foreground text-[11px]">Reporter: Jane Doe (rights@publisher.com)</p>
+                    <p className="text-[11px] text-muted-foreground/80 mt-1 italic">"1928 modern translation commentary is copyrighted."</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" className="rounded-full text-xs h-8 px-3">
+                      Request Evidence
+                    </Button>
+                    <Button size="sm" className="rounded-full text-xs h-8 px-3 font-bold bg-green-600 hover:bg-green-700 text-white">
+                      Approve & Remove
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* TAB 2: USER & ROLE MANAGEMENT */}

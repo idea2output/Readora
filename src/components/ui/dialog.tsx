@@ -99,6 +99,30 @@ export function DialogDescription({
   )
 }
 
+export function DialogContent({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn("p-6 space-y-4", className)} {...props}>
+      {children}
+    </div>
+  )
+}
+
+export function DialogHeader({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)}
+      {...props}
+    />
+  )
+}
+
 export function DialogFooter({
   className,
   ...props
