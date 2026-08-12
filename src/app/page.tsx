@@ -49,14 +49,30 @@ export default async function Home() {
               </div>
             </div>
             <div className="flex items-center justify-center">
-              <Image
-                src="/Readora.png"
-                width={550}
-                height={550}
-                alt="Readora Hero"
-                className="mx-auto aspect-square overflow-hidden rounded-xl object-contain sm:w-full"
-                priority
-              />
+              <div className="w-full max-w-md p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white shadow-2xl border border-white/10 space-y-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                  <Library className="w-48 h-48" />
+                </div>
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-xs font-semibold text-primary-foreground border border-primary/30">
+                    <Sparkles className="w-3.5 h-3.5 text-primary" /> Rights-Aware Open Library
+                  </div>
+                  <h3 className="font-serif text-2xl font-bold tracking-tight">Literary Harbor</h3>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Preserving global literature, peer-reviewed monographs, open textbooks, and sacred manuscripts under verified rights governance.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/10 text-xs">
+                  <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                    <span className="font-bold text-primary block">Public Domain</span>
+                    <span className="text-[10px] text-slate-400">Classics & Literature</span>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                    <span className="font-bold text-indigo-400 block">Open Academic</span>
+                    <span className="text-[10px] text-slate-400">DOAB, OAPEN, OpenStax</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
