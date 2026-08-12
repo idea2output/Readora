@@ -82,7 +82,7 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
         id: "default-ch-1",
         sequence_number: 1,
         title: "Canonical Section 1",
-        content: `<p class="leading-relaxed">This authoritative edition of <strong>${book.title}</strong> is preserved under Literary Harbor Rights Governance. Full canonical text digitized for open study.</p>`
+        content: `<p class="leading-relaxed text-center">This authentic edition of <strong>${book.title}</strong> is provided directly by <strong>${book.authors?.name || 'Quran Foundation (Quran.com)'}</strong> & King Fahd Quran Printing Complex. Hosted with 0 AI intervention under Literary Harbor Rights Governance.</p>`
       }
     ];
   }
