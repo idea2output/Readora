@@ -55,12 +55,15 @@ export function Header() {
         </Link>
 
         {/* Primary Navigation */}
-        <nav className="hidden lg:flex items-center space-x-6 text-xs font-bold uppercase tracking-wider">
+        <nav className="hidden lg:flex items-center space-x-5 text-xs font-bold uppercase tracking-wider">
           <Link href="/catalog" className="transition-colors hover:text-primary text-foreground/70">
             Catalog
           </Link>
           <Link href="/academic" className="transition-colors hover:text-primary text-foreground/70 flex items-center gap-1">
             <GraduationCap className="w-3.5 h-3.5 text-primary" /> Academic
+          </Link>
+          <Link href="/sacred-texts" className="transition-colors hover:text-primary text-foreground/70 flex items-center gap-1 text-amber-600 dark:text-amber-400">
+            <BookMarked className="w-3.5 h-3.5" /> Sacred Texts
           </Link>
           <Link href="/collections" className="transition-colors hover:text-primary text-foreground/70">
             Classics

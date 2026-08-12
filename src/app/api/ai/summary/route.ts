@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateCompletion } from '@/lib/ai/ai-provider';
+import { verifyAiAllowedForBook } from '@/lib/ai/guard';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -11,6 +12,12 @@ export async function POST(request: Request) {
     const { bookId, chapterId } = await request.json();
     if (!bookId || !chapterId) {
       return NextResponse.json({ error: 'Missing bookId or chapterId' }, { status: 400 });
+    }
+
+    // Sacred Text AI Firewall Check
+    const guard = await verifyAiAllowedForBook(bookId);
+    if (!guard.allowed) {
+      return NextResponse.json({ error: guard.message || 'AI features are not available for Sacred Texts.' }, { status: 403 });
     }
 
     // 1. Check Cache

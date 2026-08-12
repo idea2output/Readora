@@ -21,6 +21,7 @@ export function Footer() {
             <ul className="space-y-1.5 text-[11px]">
               <li><Link href="/catalog" className="hover:underline">Browse Catalog</Link></li>
               <li><Link href="/academic" className="hover:underline">Academic Library</Link></li>
+              <li><Link href="/sacred-texts" className="hover:underline text-amber-600 dark:text-amber-400 font-bold">Sacred Texts</Link></li>
               <li><Link href="/collections" className="hover:underline">Classics & Literature</Link></li>
               <li><Link href="/request" className="hover:underline text-indigo-600 dark:text-indigo-400 font-bold">Request a Book</Link></li>
             </ul>

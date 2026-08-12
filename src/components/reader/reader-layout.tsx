@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Menu, Settings, Bookmark, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ArrowLeft, Menu, Settings, Bookmark, ChevronLeft, ChevronRight, Check, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import {
   Sheet,
@@ -210,16 +210,25 @@ export default function ReaderLayout({ book, chapters }: ReaderLayoutProps) {
         </div>
       </main>
 
-      {/* AI Assistant Floating Panel & Passage Explainer */}
-      <AiPanel
-        book={book}
-        currentChapter={currentChapter}
-        onNavigateToChapter={(chapterId) => {
-          const idx = chapters.findIndex(c => c.id === chapterId);
-          if (idx !== -1) setCurrentChapterIdx(idx);
-        }}
-      />
-      <PassageExplainer bookTitle={book.title} />
+      {/* AI Assistant Floating Panel or Sacred Text AI Firewall Badge */}
+      {book?.content_domain === 'SACRED_TEXT' || book?.ai_enabled === false ? (
+        <div className="fixed bottom-6 right-6 z-40 bg-amber-950/90 text-amber-200 border border-amber-500/40 text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 backdrop-blur">
+          <ShieldCheck className="w-4 h-4 text-amber-400" />
+          <span>Sacred Text — Permanent AI Firewall Active</span>
+        </div>
+      ) : (
+        <>
+          <AiPanel
+            book={book}
+            currentChapter={currentChapter}
+            onNavigateToChapter={(chapterId) => {
+              const idx = chapters.findIndex(c => c.id === chapterId);
+              if (idx !== -1) setCurrentChapterIdx(idx);
+            }}
+          />
+          <PassageExplainer bookTitle={book.title} />
+        </>
+      )}
 
       {/* CSS overrides for the dynamic reader content */}
       <style dangerouslySetInnerHTML={{__html: `

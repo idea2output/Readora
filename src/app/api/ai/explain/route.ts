@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
 import { generateCompletion } from '@/lib/ai/ai-provider';
+import { verifyAiAllowedForBook } from '@/lib/ai/guard';
 
 export async function POST(request: Request) {
   try {
-    const { text, mode, bookTitle } = await request.json();
+    const { text, mode, bookTitle, bookId } = await request.json();
     if (!text) {
       return NextResponse.json({ error: 'Missing passage text' }, { status: 400 });
+    }
+
+    if (bookId) {
+      const guard = await verifyAiAllowedForBook(bookId);
+      if (!guard.allowed) {
+        return NextResponse.json({ error: guard.message || 'AI features are not available for Sacred Texts.' }, { status: 403 });
+      }
     }
 
     let promptMode = 'Explain Simply';
@@ -15,7 +23,7 @@ export async function POST(request: Request) {
     if (mode === 'modern') promptMode = 'Rewrite this passage into clear Modern English while preserving original meaning';
     if (mode === 'simple_english') promptMode = 'Rewrite this passage into Simple English suitable for young students';
 
-    const systemPrompt = `You are a literary assistant for Readora. Mode: ${promptMode}.
+    const systemPrompt = `You are a literary assistant for Literary Harbor. Mode: ${promptMode}.
 Be concise, clear, and direct. Keep your response grounded in the provided passage.`;
 
     const completion = await generateCompletion([
