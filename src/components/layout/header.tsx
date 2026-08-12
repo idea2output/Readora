@@ -30,12 +30,6 @@ export function Header() {
             >
               About
             </Link>
-            <Link
-              href="/admin/books"
-              className="transition-colors text-primary font-semibold hover:text-primary/80 flex items-center gap-1"
-            >
-              <span className="bg-primary/10 px-2 py-0.5 rounded-full text-xs">Admin</span>
-            </Link>
           </nav>
           <div className="flex items-center space-x-4">
             <div className="w-full max-w-[200px] lg:max-w-[300px] hidden sm:block">

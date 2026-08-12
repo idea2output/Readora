@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Download, RefreshCw, CheckCircle2, Clock, BookOpen, Sparkles, Layers, Library } from "lucide-react";
+import { Search, Download, RefreshCw, CheckCircle2, Clock, BookOpen, Sparkles, Layers, Library, Lock, KeyRound } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,11 @@ interface LocalBook {
   chapterCount?: number;
 }
 
-export default function AdminBooksPage() {
+export default function AdminHsibatPage() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passError, setPassError] = useState("");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<GutendexBook[]>([]);
@@ -43,6 +47,25 @@ export default function AdminBooksPage() {
   const [syncingBookId, setSyncingBookId] = useState<string | null>(null);
   const [syncMessages, setSyncMessages] = useState<{ [id: string]: string }>({});
 
+  // Check session storage on mount
+  useEffect(() => {
+    const saved = sessionStorage.getItem("readora_admin_auth");
+    if (saved === "hsibat") {
+      setAuthenticated(true);
+    }
+  }, []);
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput.trim() === "hsibat") {
+      sessionStorage.setItem("readora_admin_auth", "hsibat");
+      setAuthenticated(true);
+      setPassError("");
+    } else {
+      setPassError("Incorrect password. Please try again.");
+    }
+  };
+
   // Quick categories
   const popularTopics = [
     { label: "Popular Classics", query: "" },
@@ -52,11 +75,9 @@ export default function AdminBooksPage() {
     { label: "Mystery & Detective", topic: "mystery" },
   ];
 
-  // Fetch local books from Supabase via client route
   const fetchLocalBooks = async () => {
     setLoadingLocal(true);
     try {
-      // Fetch books via our search endpoint or a custom endpoint
       const res = await fetch("/api/admin/books/list");
       if (res.ok) {
         const data = await res.json();
@@ -70,10 +91,11 @@ export default function AdminBooksPage() {
   };
 
   useEffect(() => {
-    fetchLocalBooks();
-    // Default search for popular books
-    handleSearch("");
-  }, []);
+    if (authenticated) {
+      fetchLocalBooks();
+      handleSearch("");
+    }
+  }, [authenticated]);
 
   const handleSearch = async (queryOverride?: string, topicOverride?: string) => {
     const q = queryOverride !== undefined ? queryOverride : searchQuery;
@@ -146,6 +168,50 @@ export default function AdminBooksPage() {
       setSyncingBookId(null);
     }
   };
+
+  // Password Gate Lock Screen
+  if (!authenticated) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-4">
+        <Card className="w-full max-w-md rounded-3xl shadow-2xl border border-primary/20 bg-card overflow-hidden">
+          <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-8 text-center space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mx-auto backdrop-blur-md">
+              <Lock className="w-7 h-7 text-primary-foreground" />
+            </div>
+            <h2 className="font-serif text-2xl font-bold">Admin Portal</h2>
+            <p className="text-xs text-slate-300">
+              Restricted area. Please enter your authorization password to continue.
+            </p>
+          </div>
+          <CardContent className="p-6">
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-primary" /> Admin Password
+                </label>
+                <Input
+                  type="password"
+                  placeholder="Enter password..."
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  className="rounded-full px-4 py-5 border-muted-foreground/30 focus-visible:ring-primary"
+                  autoFocus
+                />
+              </div>
+
+              {passError && (
+                <p className="text-xs text-destructive font-semibold text-center">{passError}</p>
+              )}
+
+              <Button type="submit" className="w-full rounded-full py-5 font-bold shadow-md">
+                Authenticate & Access
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-7xl mx-auto py-10 px-4 space-y-10">
