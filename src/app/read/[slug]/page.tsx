@@ -2,6 +2,7 @@ import { getBookBySlug } from '@/lib/db/books';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import ReaderLayout from '@/components/reader/reader-layout';
+import { getQuranFoundationSurahs, getQuranFoundationVerses } from '@/lib/quran/quran-foundation';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
@@ -12,51 +13,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `Reading: ${book.title} | Literary Harbor`,
   };
 }
-
-const DEFAULT_SACRED_CHAPTERS: Record<string, any[]> = {
-  "holy-quran-arabic": [
-    {
-      id: "quran-ch-1",
-      sequence_number: 1,
-      title: "Surah Al-Fatiha (سورة الفاتحة)",
-      content: `<div dir="rtl" class="text-right font-serif text-xl leading-loose space-y-4">
-        <p class="text-2xl text-amber-900 dark:text-amber-200 font-bold mb-6">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
-        <p>الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ ﴿١﴾ الرَّحْمَٰنِ الرَّحِيمِ ﴿٢﴾ مَالِكِ يَوْمِ الدِّينِ ﴿٣﴾ إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ ﴿٤﴾ اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ ﴿٥﴾ صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ ﴿٦﴾</p>
-      </div>`
-    },
-    {
-      id: "quran-ch-2",
-      sequence_number: 2,
-      title: "Surah Al-Baqarah (سورة البقرة - Verses 1-5)",
-      content: `<div dir="rtl" class="text-right font-serif text-xl leading-loose space-y-4">
-        <p class="text-2xl text-amber-900 dark:text-amber-200 font-bold mb-6">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
-        <p>الم ﴿١﴾ ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِّلْمُتَّقِينَ ﴿٢﴾ الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنفِقُونَ ﴿٣﴾ وَالَّذِينَ يُؤْمِنُونَ بِمَا أُنزِلَ إِلَيْكَ وَمَا أُنزِلَ مِن قَبْلِكَ وَبِالْآخِرَةِ هُمْ يُوقِنُونَ ﴿٤﴾ أُولَٰئِكَ عَلَىٰ هُدًى مِّن رَّبِّهِمْ ۖ وَأُولَٰئِكَ هُمُ الْمُفْلِحُونَ ﴿٥﴾</p>
-      </div>`
-    }
-  ],
-  "bhagavad-gita": [
-    {
-      id: "gita-ch-1",
-      sequence_number: 1,
-      title: "Chapter 1: Arjuna Vishada Yoga (अर्जुनविषादयोग)",
-      content: `<div class="font-serif text-lg leading-relaxed space-y-4">
-        <p class="text-xl text-amber-900 dark:text-amber-200 font-bold">धृतराष्ट्र उवाच | धर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः | मामकाः पाण्डवाश्चैव किमकुर्वत सञ्जय || 1 ||</p>
-        <p><em>Dhritarashtra said: O Sanjaya, assembled on the sacred plain of Kurukshetra, desiring to fight, what did my sons and the sons of Pandu do?</em></p>
-      </div>`
-    }
-  ],
-  "tao-te-ching": [
-    {
-      id: "tao-ch-1",
-      sequence_number: 1,
-      title: "Chapter 1 (第一章)",
-      content: `<div class="font-serif text-lg leading-relaxed space-y-4">
-        <p class="text-2xl text-amber-900 dark:text-amber-200 font-bold">道可道，非常道。名可名，非常名。</p>
-        <p><em>The Tao that can be told of is not an Unchanging Way; The names that can be named are not un-changing names.</em></p>
-      </div>`
-    }
-  ]
-};
 
 export default async function ReadPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
@@ -75,9 +31,52 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
     .order('sequence_number', { ascending: true });
 
   let finalChapters = chapters || [];
-  if (finalChapters.length === 0 && DEFAULT_SACRED_CHAPTERS[resolvedParams.slug]) {
-    finalChapters = DEFAULT_SACRED_CHAPTERS[resolvedParams.slug];
-  } else if (finalChapters.length === 0) {
+
+  // Live Quran Foundation API v4 Integration for Quranic reading
+  if (resolvedParams.slug === 'holy-quran-arabic') {
+    try {
+      const surahs = await getQuranFoundationSurahs();
+      if (surahs && surahs.length > 0) {
+        // Build first 5 Surahs dynamically directly from Quran Foundation API
+        const quranFoundationChapters = [];
+        for (const surah of surahs.slice(0, 5)) {
+          const verses = await getQuranFoundationVerses(surah.id);
+          const versesHtml = verses
+            .map(
+              (v: any) =>
+                `<span class="inline-block mx-1 font-serif">${v.text_uthmani}</span> <span class="inline-flex items-center justify-center w-7 h-7 text-xs rounded-full border border-amber-500/40 text-amber-900 dark:text-amber-300 mx-1 font-mono font-bold">﴿${v.verse_key.split(':')[1]}﴾</span>`
+            )
+            .join(' ');
+
+          quranFoundationChapters.push({
+            id: `quran-foundation-surah-${surah.id}`,
+            sequence_number: surah.id,
+            title: `Surah ${surah.name_simple} (${surah.name_arabic})`,
+            content: `
+              <div dir="rtl" class="text-right font-serif text-xl leading-loose space-y-6">
+                <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center text-xs font-bold text-amber-900 dark:text-amber-200 mb-6">
+                  Text Sourced Directly from Quran Foundation API (Quran.com) & King Fahd Quran Printing Complex
+                </div>
+                ${surah.bismillah_pre ? '<p class="text-2xl text-amber-900 dark:text-amber-200 font-extrabold text-center mb-6">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>' : ''}
+                <div class="leading-[2.4] tracking-wide text-foreground">
+                  ${versesHtml}
+                </div>
+              </div>
+            `,
+          });
+        }
+
+        if (quranFoundationChapters.length > 0) {
+          finalChapters = quranFoundationChapters;
+        }
+      }
+    } catch (err) {
+      console.error('Quran Foundation API live fetch error:', err);
+    }
+  }
+
+  // General Fallback for other Sacred Texts
+  if (finalChapters.length === 0) {
     finalChapters = [
       {
         id: "default-ch-1",
