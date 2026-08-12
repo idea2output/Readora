@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
-import { BookMarked, ShieldCheck, Globe, BookOpen, Layers, GitCompare, FileCode2 } from "lucide-react";
+import { BookMarked, ShieldCheck, Globe, BookOpen, GitCompare } from "lucide-react";
 
 const TRADITIONS = [
   { id: "islam", name: "Islam", count: "Quran, Hadith, Tafsir", description: "Quranic text, classical Hadith collections, and historical theological works.", icon: "☪️" },
@@ -69,36 +69,36 @@ export default function SacredTextsPage() {
   return (
     <div className="container mx-auto px-4 md:px-6 py-10 space-y-12">
       {/* Neutral Hero Section */}
-      <div className="rounded-3xl bg-gradient-to-r from-amber-950 via-slate-900 to-slate-950 text-white p-8 md:p-12 shadow-2xl relative overflow-hidden space-y-6 border border-amber-500/20">
+      <div className="rounded-3xl bg-gradient-to-r from-amber-950 via-slate-900 to-slate-950 text-white p-8 md:p-12 shadow-2xl relative overflow-hidden space-y-6 border border-amber-500/30">
         <div className="max-w-3xl space-y-4">
-          <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider gap-1.5">
-            <BookMarked className="w-4 h-4 text-amber-400" /> First-Class Sacred Library Section
+          <Badge className="bg-amber-600 text-white border-0 px-3.5 py-1 text-xs font-bold uppercase tracking-wider gap-1.5">
+            <BookMarked className="w-4 h-4 text-amber-200" /> First-Class Sacred Library Section
           </Badge>
-          <h1 className="font-serif text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+          <h1 className="font-serif text-4xl md:text-5xl font-extrabold tracking-tight leading-tight text-white">
             Sacred Texts & Religious Literature
           </h1>
-          <p className="text-sm md:text-base text-slate-300 leading-relaxed">
+          <p className="text-sm md:text-base text-slate-200 leading-relaxed font-medium">
             Explore sacred writings and religious literature from traditions around the world. Presented with institutional neutrality, faithful formatting, and verified rights governance.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 pt-2 text-xs font-medium text-amber-200/90 border-t border-amber-500/20">
+        <div className="flex flex-wrap items-center gap-4 pt-2 text-xs font-bold text-amber-200 border-t border-amber-500/30">
           <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-green-400" /> Complete AI Isolation Firewall</span>
           <span className="flex items-center gap-1.5"><Globe className="w-4 h-4 text-amber-400" /> Multi-Language & RTL Support</span>
-          <span className="flex items-center gap-1.5"><GitCompare className="w-4 h-4 text-indigo-400" /> Multi-Translation Comparison</span>
+          <span className="flex items-center gap-1.5"><GitCompare className="w-4 h-4 text-indigo-300" /> Multi-Translation Comparison</span>
         </div>
       </div>
 
-      {/* AI Isolation Banner */}
-      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-950 dark:text-amber-200 text-xs font-semibold flex items-center justify-between gap-3 shadow-sm">
+      {/* AI Isolation Banner with High Contrast */}
+      <div className="p-4 rounded-2xl bg-amber-100 border border-amber-300 dark:bg-amber-950/60 dark:border-amber-700 text-amber-950 dark:text-amber-100 text-xs font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <ShieldCheck className="w-5 h-5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
           <span>
             <strong>Institutional Neutrality & Integrity Guarantee:</strong> Sacred Texts operate under a permanent AI Firewall. No AI rewriting, AI summaries, or synthetic interpretations are ever performed on Sacred Texts.
           </span>
         </div>
         <Link href="/sacred-texts/compare">
-          <Button size="sm" variant="outline" className="rounded-full text-xs font-bold gap-1 border-amber-500/40 hover:bg-amber-500/10 flex-shrink-0">
+          <Button size="sm" variant="outline" className="rounded-full text-xs font-bold gap-1 border-amber-400 text-amber-950 dark:text-amber-100 hover:bg-amber-200 dark:hover:bg-amber-900 flex-shrink-0">
             <GitCompare className="w-3.5 h-3.5" /> Compare Editions
           </Button>
         </Link>
@@ -114,19 +114,19 @@ export default function SacredTextsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between border-b pb-4">
           <div>
-            <h2 className="font-serif text-2xl font-bold tracking-tight text-foreground">Browse by Tradition</h2>
-            <p className="text-xs text-muted-foreground">Neutral, non-hierarchical library categorization across world traditions</p>
+            <h2 className="font-serif text-2xl font-extrabold tracking-tight text-foreground">Browse by Tradition</h2>
+            <p className="text-xs text-muted-foreground font-medium">Neutral, non-hierarchical library categorization across world traditions</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {TRADITIONS.map((trad) => (
             <Link key={trad.id} href={`/sacred-texts/${trad.id}`}>
-              <Card className="h-full rounded-2xl border hover:border-amber-500/50 hover:shadow-lg transition-all group cursor-pointer bg-card">
+              <Card className="h-full rounded-2xl border hover:border-amber-500/60 hover:shadow-lg transition-all group cursor-pointer bg-card">
                 <CardContent className="p-5 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-3xl">{trad.icon}</span>
-                    <Badge variant="outline" className="text-[10px] font-mono text-muted-foreground group-hover:border-amber-500/40">
+                    <Badge variant="outline" className="text-[10px] font-mono text-foreground/80 font-bold group-hover:border-amber-500/60">
                       {trad.count}
                     </Badge>
                   </div>
@@ -149,8 +149,8 @@ export default function SacredTextsPage() {
       <div className="space-y-6 pt-4">
         <div className="flex items-center justify-between border-b pb-4">
           <div>
-            <h2 className="font-serif text-2xl font-bold tracking-tight text-foreground">Featured Sacred Texts</h2>
-            <p className="text-xs text-muted-foreground">Verified public-domain & openly licensed digital editions</p>
+            <h2 className="font-serif text-2xl font-extrabold tracking-tight text-foreground">Featured Sacred Texts</h2>
+            <p className="text-xs text-muted-foreground font-medium">Verified public-domain & openly licensed digital editions</p>
           </div>
           <Link href="/catalog?genre=Sacred">
             <Button variant="ghost" className="text-xs font-bold text-primary">View All Texts →</Button>
@@ -159,13 +159,13 @@ export default function SacredTextsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {FEATURED_SACRED_TEXTS.map((item) => (
-            <Card key={item.id} className="rounded-3xl border shadow-md flex flex-col justify-between p-6 space-y-4 hover:border-amber-500/40 transition-all">
+            <Card key={item.id} className="rounded-3xl border shadow-md flex flex-col justify-between p-6 space-y-4 hover:border-amber-500/50 transition-all bg-card">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Badge className="bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/30 text-[10px] font-bold">
+                  <Badge className="bg-amber-600 text-white font-bold border-0 text-[10px]">
                     {item.tradition}
                   </Badge>
-                  {item.rtl && <Badge variant="outline" className="text-[10px] font-mono">RTL Supported</Badge>}
+                  {item.rtl && <Badge variant="outline" className="text-[10px] font-mono font-bold">RTL Supported</Badge>}
                 </div>
                 <h3 className="font-serif font-bold text-lg text-foreground leading-snug">{item.title}</h3>
                 <div className="text-xs space-y-1 text-muted-foreground">
@@ -176,8 +176,8 @@ export default function SacredTextsPage() {
               </div>
 
               <div className="pt-3 border-t flex items-center justify-between">
-                <Link href={`/books/${item.slug}`} className="w-full">
-                  <Button className="w-full rounded-full text-xs font-bold gap-1.5 bg-amber-700 hover:bg-amber-800 text-white">
+                <Link href={`/read/${item.slug}`} className="w-full">
+                  <Button className="w-full rounded-full text-xs font-bold gap-1.5 bg-amber-700 hover:bg-amber-800 text-white shadow-md">
                     <BookOpen className="w-3.5 h-3.5" /> Read Sacred Text
                   </Button>
                 </Link>

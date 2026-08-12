@@ -32,7 +32,7 @@ const TRADITION_DETAILS: Record<string, { name: string; icon: string; descriptio
     icon: "✡️",
     description: "Torah, Tanakh, Mishnah, Babylonian & Jerusalem Talmud, Midrash, and historical Jewish philosophy.",
     sampleTexts: [
-      { id: "7", title: "The Torah (תּוֹרָה)", originalLanguage: "Hebrew (עברית)", edition: "Masoretic Text Edition", rights: "Public Domain", slug: "torah-hebrew" },
+      { id: "7", title: "The Torah (תּוֹرָה)", originalLanguage: "Hebrew (עברית)", edition: "Masoretic Text Edition", rights: "Public Domain", slug: "torah-hebrew" },
       { id: "8", title: "The Tanakh (תנ״ך)", originalLanguage: "Hebrew / Aramaic", edition: "Jewish Publication Society 1917", rights: "Public Domain", slug: "tanakh-jps" },
       { id: "9", title: "The Guide for the Perplexed (מורה נבוכים)", originalLanguage: "Judeo-Arabic", edition: "Maimonides Philosophical Work", rights: "Public Domain", slug: "guide-for-perplexed" },
     ],
@@ -77,28 +77,29 @@ export default async function TraditionDetailPage({
         <ArrowLeft className="w-4 h-4" /> Back to Sacred Texts Catalog
       </Link>
 
-      <div className="rounded-3xl bg-gradient-to-r from-amber-950 via-slate-900 to-slate-950 text-white p-8 shadow-xl border border-amber-500/20 space-y-4">
+      <div className="rounded-3xl bg-gradient-to-r from-amber-950 via-slate-900 to-slate-950 text-white p-8 shadow-xl border border-amber-500/30 space-y-4">
         <div className="flex items-center gap-3">
           <span className="text-4xl">{detail.icon}</span>
           <div>
-            <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-[10px] uppercase tracking-wider font-semibold">
+            <Badge className="bg-amber-600 text-white border-0 text-[10px] uppercase tracking-wider font-bold">
               Religious Tradition Library
             </Badge>
-            <h1 className="font-serif text-3xl font-extrabold">{detail.name}</h1>
+            <h1 className="font-serif text-3xl md:text-4xl font-extrabold tracking-tight mt-1 text-white">{detail.name}</h1>
           </div>
         </div>
-        <p className="text-xs md:text-sm text-slate-300 leading-relaxed max-w-3xl">
+        <p className="text-xs md:text-sm text-slate-200 leading-relaxed max-w-3xl font-medium">
           {detail.description}
         </p>
       </div>
 
-      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-950 dark:text-amber-200 text-xs font-semibold flex items-center justify-between gap-3">
+      {/* AI Isolation Banner with Ultra-Sharp Contrast */}
+      <div className="p-4 rounded-2xl bg-amber-100 border border-amber-300 dark:bg-amber-950/60 dark:border-amber-700 text-amber-950 dark:text-amber-100 text-xs font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <ShieldCheck className="w-5 h-5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
           <span><strong>AI Firewall Protection:</strong> All {detail.name} sacred texts operate with 0 AI intervention to preserve original textual integrity.</span>
         </div>
         <Link href="/sacred-texts/compare">
-          <Button size="sm" variant="outline" className="rounded-full text-xs font-bold gap-1 border-amber-500/40">
+          <Button size="sm" variant="outline" className="rounded-full text-xs font-bold gap-1 border-amber-400 text-amber-950 dark:text-amber-100 hover:bg-amber-200 dark:hover:bg-amber-900">
             <GitCompare className="w-3.5 h-3.5" /> Compare Translations
           </Button>
         </Link>
@@ -106,24 +107,24 @@ export default async function TraditionDetailPage({
 
       <div className="space-y-6">
         <div className="flex items-center justify-between border-b pb-4">
-          <h2 className="font-serif text-2xl font-bold text-foreground">Available Sacred Works ({detail.name})</h2>
+          <h2 className="font-serif text-2xl font-extrabold text-foreground">Available Sacred Works ({detail.name})</h2>
           <SearchInput placeholder={`Search ${detail.name} texts...`} className="max-w-xs text-xs" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {detail.sampleTexts.map((text) => (
-            <Card key={text.id} className="rounded-3xl border shadow-md p-6 flex flex-col justify-between space-y-4 hover:border-amber-500/40 transition-all">
-              <div className="space-y-2">
-                <Badge className="bg-amber-500/20 text-amber-800 dark:text-amber-300 border-0 text-[10px] font-bold">
+            <Card key={text.id} className="rounded-3xl border shadow-md p-6 flex flex-col justify-between space-y-4 hover:border-amber-500/50 transition-all bg-card">
+              <div className="space-y-2.5">
+                <Badge className="bg-amber-600 text-white font-bold border-0 text-[10px]">
                   {text.originalLanguage}
                 </Badge>
-                <h3 className="font-serif font-bold text-lg text-foreground">{text.title}</h3>
+                <h3 className="font-serif font-bold text-lg text-foreground leading-snug">{text.title}</h3>
                 <p className="text-xs text-muted-foreground"><strong>Edition:</strong> {text.edition}</p>
                 <p className="text-xs text-muted-foreground"><strong>Rights:</strong> {text.rights}</p>
               </div>
 
-              <Link href={`/books/${text.slug}`}>
-                <Button className="w-full rounded-full text-xs font-bold gap-1.5 bg-amber-700 hover:bg-amber-800 text-white">
+              <Link href={`/read/${text.slug}`}>
+                <Button className="w-full rounded-full text-xs font-bold gap-1.5 bg-amber-700 hover:bg-amber-800 text-white shadow-md">
                   <BookOpen className="w-3.5 h-3.5" /> Read Sacred Text
                 </Button>
               </Link>
