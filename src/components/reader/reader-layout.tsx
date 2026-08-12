@@ -17,6 +17,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { AiPanel } from '@/components/reader/ai-panel';
+import { PassageExplainer } from '@/components/reader/passage-explainer';
 
 interface ReaderLayoutProps {
   book: any;
@@ -207,6 +209,17 @@ export default function ReaderLayout({ book, chapters }: ReaderLayoutProps) {
           </Button>
         </div>
       </main>
+
+      {/* AI Assistant Floating Panel & Passage Explainer */}
+      <AiPanel
+        book={book}
+        currentChapter={currentChapter}
+        onNavigateToChapter={(chapterId) => {
+          const idx = chapters.findIndex(c => c.id === chapterId);
+          if (idx !== -1) setCurrentChapterIdx(idx);
+        }}
+      />
+      <PassageExplainer bookTitle={book.title} />
 
       {/* CSS overrides for the dynamic reader content */}
       <style dangerouslySetInnerHTML={{__html: `
