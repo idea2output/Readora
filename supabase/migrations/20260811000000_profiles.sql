@@ -38,3 +38,8 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Revoke public REST RPC execution privileges for SECURITY DEFINER function
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+grant execute on function public.handle_new_user() to service_role;
+
