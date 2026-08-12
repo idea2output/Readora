@@ -671,16 +671,16 @@ export default function AdminHsibatPage() {
           <Card className="rounded-3xl shadow-xl border-amber-500/20">
             <CardHeader className="p-6 border-b flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-xl font-bold flex items-center gap-2 text-amber-800 dark:text-amber-300">
-                  <ShieldAlert className="w-5 h-5 text-amber-500" /> Copyright Takedown & Rights Case Queue
+                <CardTitle className="text-xl font-extrabold flex items-center gap-2 text-amber-950 dark:text-amber-200">
+                  <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400" /> Copyright Takedown & Rights Case Queue
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs text-muted-foreground font-medium">
                   Review formal rights notifications, claims, and counter-notices (Cases format: LH-RIGHTS-2026-XXXXXX).
                 </CardDescription>
               </div>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-900 dark:text-amber-200">
+              <div className="p-4 rounded-2xl bg-amber-100 border border-amber-300 dark:bg-amber-950/60 dark:border-amber-700 text-xs font-bold text-amber-950 dark:text-amber-100 shadow-sm">
                 Notice: When a copyright report is submitted, the title is automatically placed under temporary restriction pending reviewer decision.
               </div>
 
