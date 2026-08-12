@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { PLANS } from '@/lib/stripe/stripe';
 import { getSystemSettings } from '@/lib/ai/settings-service';
 
+export const runtime = 'edge';
+
 export async function POST(request: Request) {
   try {
     const settings = await getSystemSettings();
