@@ -9,9 +9,17 @@ const STATE_FILE = path.join(__dirname, '.sync-state.json');
 // Helper to delay execution
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+function generateSlug(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+}
+
 function getSyncedBookIds() {
   if (fs.existsSync(STATE_FILE)) {
-    return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+    try {
+      return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+    } catch (_) {
+      return [];
+    }
   }
   return [];
 }
@@ -48,7 +56,6 @@ function splitIntoChapters(content, isHtml = true) {
   }
 
   // Plain text or fallback formatting
-  // Convert plain text double line breaks to HTML paragraphs
   const cleanText = content.replace(/\r\n/g, '\n');
   const rawChapters = cleanText.split(/\n(?=(?:CHAPTER|Chapter|Book|BOOK|PART|Part)\s+[0-9IVXLC]+)/i);
 
@@ -66,7 +73,6 @@ function splitIntoChapters(content, isHtml = true) {
     });
   }
 
-  // Fallback: split long text into ~10k character readable chapters
   const paragraphs = cleanText.split(/\n\s*\n/).filter(p => p.trim());
   const chapters = [];
   let currentChunk = [];
@@ -90,125 +96,235 @@ function splitIntoChapters(content, isHtml = true) {
   return chapters.length > 0 ? chapters : [{ title: "Full Text", content: `<p>${content}</p>` }];
 }
 
+// Download real content from Gutenberg mirrors
+async function downloadRealChapters(gutendexId) {
+  const candidateUrls = [
+    { url: `https://www.gutenberg.org/cache/epub/${gutendexId}/pg${gutendexId}.html.utf8`, type: 'html' },
+    { url: `https://www.gutenberg.org/ebooks/${gutendexId}.html.images`, type: 'html' },
+    { url: `https://www.gutenberg.org/cache/epub/${gutendexId}/pg${gutendexId}.txt`, type: 'text' },
+    { url: `https://www.gutenberg.org/ebooks/${gutendexId}.txt.utf-8`, type: 'text' }
+  ];
+
+  for (const item of candidateUrls) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+      const res = await fetch(item.url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,text/plain,application/xhtml+xml;q=0.9,*/*;q=0.8',
+        },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const text = await res.text();
+        return { content: text, type: item.type };
+      }
+    } catch (_) {}
+  }
+  return null;
+}
+
+// Import a new Gutenberg book into Supabase
+async function importGutenbergBook(gBook) {
+  const gAuthor = gBook.authors && gBook.authors.length > 0 ? gBook.authors[0] : { name: "Unknown Author" };
+
+  // 1. Author
+  const authorSlugBase = generateSlug(gAuthor.name);
+  let { data: existingAuthor } = await supabase
+    .from('authors')
+    .select('id')
+    .ilike('name', gAuthor.name)
+    .maybeSingle();
+
+  let authorId = existingAuthor?.id;
+  if (!authorId) {
+    const { data: newAuthor } = await supabase
+      .from('authors')
+      .insert({
+        name: gAuthor.name,
+        slug: `${authorSlugBase}-${Math.floor(Math.random() * 10000)}`,
+        birth_year: gAuthor.birth_year || null,
+        death_year: gAuthor.death_year || null,
+      })
+      .select('id')
+      .single();
+    if (newAuthor) authorId = newAuthor.id;
+  }
+
+  // 2. Book
+  const bookSlug = `${generateSlug(gBook.title)}-${gBook.id}`;
+  const coverUrl = gBook.formats['image/jpeg'] || null;
+  const gutenbergSourceUrl = `https://www.gutenberg.org/ebooks/${gBook.id}`;
+  const subjects = gBook.subjects || [];
+  const mainGenre = subjects[0] ? subjects[0].split(' -- ')[0] : 'General Fiction';
+
+  const { data: newBook, error: bookErr } = await supabase
+    .from('books')
+    .insert({
+      title: gBook.title,
+      slug: bookSlug,
+      author_id: authorId,
+      cover_url: coverUrl,
+      genre: mainGenre,
+      language: gBook.languages ? gBook.languages[0] : 'en',
+      copyright_status: gBook.copyright ? 'copyrighted' : 'public_domain',
+      status: 'published',
+      description: gBook.summaries && gBook.summaries.length > 0
+        ? gBook.summaries[0]
+        : `A classic work by ${gAuthor.name}, available free via Project Gutenberg.`,
+      source_url: gutenbergSourceUrl,
+    })
+    .select('*')
+    .single();
+
+  if (bookErr || !newBook) return null;
+
+  // 3. Categories
+  for (const subj of subjects.slice(0, 3)) {
+    const cleanCatName = subj.split(' -- ')[0];
+    let { data: existingCat } = await supabase
+      .from('categories')
+      .select('id')
+      .ilike('name', cleanCatName)
+      .maybeSingle();
+
+    let catId = existingCat?.id;
+    if (!catId) {
+      const { data: newCat } = await supabase
+        .from('categories')
+        .insert({
+          name: cleanCatName,
+          slug: `${generateSlug(cleanCatName)}-${Math.floor(Math.random() * 1000)}`
+        })
+        .select('id')
+        .single();
+      if (newCat) catId = newCat.id;
+    }
+
+    if (catId) {
+      await supabase.from('book_categories').insert({
+        book_id: newBook.id,
+        category_id: catId
+      }).catch(() => {});
+    }
+  }
+
+  return newBook;
+}
+
 async function startWorker() {
-  console.log("=========================================");
-  console.log("📚 Readora Background Sync Worker Started");
-  console.log("=========================================");
+  console.log("=================================================");
+  console.log("📚 Readora Intelligent Catalog & Gutenberg Sync");
+  console.log("=================================================");
+
+  let currentGutendexPage = 1;
 
   while (true) {
     const syncedIds = getSyncedBookIds();
 
-    let query = supabase.from('books').select('id, title, source_url').limit(1);
+    // 1. First Priority: Sync existing books in local DB that need chapters
+    let query = supabase.from('books').select('id, title, source_url, slug').limit(1);
     if (syncedIds.length > 0) {
       query = query.not('id', 'in', `(${syncedIds.join(',')})`);
     }
 
-    const { data: books, error } = await query;
+    const { data: unsyncedBooks } = await query;
 
-    if (error) {
-      console.error("❌ DB Error:", error.message);
-      await sleep(10000);
-      continue;
-    }
+    if (unsyncedBooks && unsyncedBooks.length > 0) {
+      const book = unsyncedBooks[0];
+      console.log(`\n⏳ [HYDRATING EXISTING BOOK] ${book.title}`);
 
-    if (!books || books.length === 0) {
-      console.log("✅ All books are fully synced! Worker sleeping for 5 minutes...");
-      await sleep(5 * 60 * 1000);
-      continue;
-    }
-
-    const book = books[0];
-    console.log(`\n⏳ [SYNCING] ${book.title}`);
-    
-    let gutendexId = null;
-    if (book.source_url && book.source_url.includes('ebooks/')) {
-       gutendexId = book.source_url.split('/').pop().replace(/[^0-9]/g, '');
-    }
-
-    if (!gutendexId) {
-      console.log(`⏭️  No Gutenberg ID found for ${book.title}, skipping.`);
-      saveSyncedBookId(book.id);
-      continue;
-    }
-
-    // Reliable candidate URLs in order of preference
-    const candidateUrls = [
-      { url: `https://www.gutenberg.org/cache/epub/${gutendexId}/pg${gutendexId}.html.utf8`, type: 'html' },
-      { url: `https://www.gutenberg.org/ebooks/${gutendexId}.html.images`, type: 'html' },
-      { url: `https://www.gutenberg.org/cache/epub/${gutendexId}/pg${gutendexId}.txt`, type: 'text' },
-      { url: `https://www.gutenberg.org/ebooks/${gutendexId}.txt.utf-8`, type: 'text' }
-    ];
-
-    let downloadedContent = null;
-    let contentType = 'html';
-
-    for (const item of candidateUrls) {
-      try {
-        console.log(`   Trying fetch from: ${item.url}`);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000);
-
-        const res = await fetch(item.url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,text/plain,application/xhtml+xml;q=0.9,*/*;q=0.8',
-          },
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if (res.ok) {
-          downloadedContent = await res.text();
-          contentType = item.type;
-          console.log(`   ⚡ Download successful! (${(downloadedContent.length / 1024).toFixed(1)} KB)`);
-          break;
-        }
-      } catch (e) {
-        console.log(`   ⚠️ Failed (${item.url.split('/').pop()}): ${e.message}`);
+      let gutendexId = null;
+      if (book.source_url && book.source_url.includes('ebooks/')) {
+        gutendexId = book.source_url.split('/').pop().replace(/[^0-9]/g, '');
       }
-    }
 
-    if (!downloadedContent) {
-      console.error(`❌ All fetch attempts failed for ${book.title}. Skipping for now.`);
+      if (gutendexId) {
+        const downloaded = await downloadRealChapters(gutendexId);
+        if (downloaded) {
+          const chapters = splitIntoChapters(downloaded.content, downloaded.type === 'html');
+          const safeChapters = chapters.slice(0, 50).map((ch, idx) => ({
+            book_id: book.id,
+            title: ch.title,
+            sequence_number: idx + 1,
+            content: ch.content
+          }));
+
+          await supabase.from('chapters').delete().eq('book_id', book.id);
+          await supabase.from('chapters').insert(safeChapters);
+          console.log(`✅ Synced ${safeChapters.length} chapters for "${book.title}"!`);
+        }
+      }
       saveSyncedBookId(book.id);
-      console.log(`\n💤 Sleeping 15 seconds...`);
+      console.log(`💤 Sleeping 15 seconds...`);
       await sleep(15000);
       continue;
     }
 
+    // 2. Second Priority: Compare Local Library with Gutenberg Catalog & Auto-Download New Books!
+    console.log(`\n🔍 [CATALOG COMPARISON] Querying Gutenberg Catalog (Page ${currentGutendexPage})...`);
     try {
-      const isHtml = contentType === 'html';
-      const newChapters = splitIntoChapters(downloadedContent, isHtml);
+      const res = await fetch(`https://gutendex.com/books/?sort=popular&page=${currentGutendexPage}`);
+      if (res.ok) {
+        const data = await res.json();
+        const gBooks = data.results || [];
 
-      // Limit to 50 chapters
-      const safeChapters = newChapters.slice(0, 50).map((ch, idx) => ({
-        book_id: book.id,
-        title: ch.title,
-        sequence_number: idx + 1,
-        content: ch.content
-      }));
+        let newImports = 0;
+        for (const gBook of gBooks) {
+          const expectedSlug = `${generateSlug(gBook.title)}-${gBook.id}`;
+          const gutenbergUrl = `https://www.gutenberg.org/ebooks/${gBook.id}`;
 
-      // 1. Delete old placeholder/dummy chapters
-      await supabase.from('chapters').delete().eq('book_id', book.id);
+          // Check if book exists in Supabase catalog
+          const { data: existing } = await supabase
+            .from('books')
+            .select('id')
+            .or(`slug.eq.${expectedSlug},source_url.eq.${gutenbergUrl}`)
+            .maybeSingle();
 
-      // 2. Insert real chapters
-      const { error: insertErr } = await supabase.from('chapters').insert(safeChapters);
-      
-      if (insertErr) {
-        console.error("❌ Failed to insert real chapters:", insertErr.message);
-      } else {
-        console.log(`✅ Successfully saved ${safeChapters.length} real chapters for "${book.title}"!`);
-        saveSyncedBookId(book.id);
+          if (!existing) {
+            console.log(`\n✨ 🆕 [NEW BOOK DISCOVERED] "${gBook.title}" (ID: #${gBook.id})`);
+            console.log(`   Importing metadata into catalog...`);
+
+            const importedBook = await importGutenbergBook(gBook);
+            if (importedBook) {
+              console.log(`   Downloading real chapters from Gutenberg...`);
+              const downloaded = await downloadRealChapters(gBook.id);
+
+              if (downloaded) {
+                const chapters = splitIntoChapters(downloaded.content, downloaded.type === 'html');
+                const safeChapters = chapters.slice(0, 50).map((ch, idx) => ({
+                  book_id: importedBook.id,
+                  title: ch.title,
+                  sequence_number: idx + 1,
+                  content: ch.content
+                }));
+                await supabase.from('chapters').insert(safeChapters);
+                console.log(`🎉 Successfully added "${gBook.title}" with ${safeChapters.length} chapters to your library!`);
+              }
+              saveSyncedBookId(importedBook.id);
+              newImports++;
+
+              console.log(`💤 Sleeping 15 seconds before next book...`);
+              await sleep(15000);
+            }
+          }
+        }
+
+        if (newImports === 0) {
+          console.log(`✓ All books on Gutenberg Page ${currentGutendexPage} are already in your library.`);
+          currentGutendexPage++; // Advance to next Gutenberg catalog page!
+        }
       }
-
     } catch (err) {
-      console.error(`❌ Parsing/saving failed for ${book.title}:`, err.message);
-      saveSyncedBookId(book.id);
+      console.error(`⚠️ Gutenberg query error: ${err.message}`);
     }
 
-    // Reduced gap to 15 seconds since we are using fast endpoints now
-    console.log(`\n💤 Sleeping for 15 seconds before next book...`);
-    await sleep(15000);
+    console.log(`💤 Sleeping 20 seconds before checking next page...`);
+    await sleep(20000);
   }
 }
 
