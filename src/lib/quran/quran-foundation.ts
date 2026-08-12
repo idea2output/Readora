@@ -19,12 +19,41 @@ export interface QuranSurah {
   };
 }
 
+function getQuranFoundationBaseUrl(): string {
+  const customEndpoint = process.env.QURAN_FOUNDATION_ENDPOINT;
+  if (customEndpoint && customEndpoint.trim()) {
+    return customEndpoint.trim().replace(/\/+$/, '');
+  }
+  return "https://api.quran.com/api/v4";
+}
+
+function getQuranFoundationHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Accept': 'application/json',
+  };
+
+  const clientId = process.env.QURAN_FOUNDATION_CLIENT_ID;
+  const clientSecret = process.env.QURAN_FOUNDATION_CLIENT_SECRET;
+
+  if (clientId) {
+    headers['x-client-id'] = clientId;
+    headers['x-api-key'] = clientId;
+  }
+  if (clientSecret) {
+    headers['x-client-secret'] = clientSecret;
+  }
+
+  return headers;
+}
+
 /**
  * Fetch all 114 Surahs directly from Quran Foundation API
  */
 export async function getQuranFoundationSurahs(): Promise<QuranSurah[]> {
+  const baseUrl = getQuranFoundationBaseUrl();
   try {
-    const res = await fetch("https://api.quran.com/api/v4/chapters?language=en", {
+    const res = await fetch(`${baseUrl}/chapters?language=en`, {
+      headers: getQuranFoundationHeaders(),
       next: { revalidate: 86400 }, // Cache for 24 hours
     });
     if (res.ok) {
@@ -41,10 +70,14 @@ export async function getQuranFoundationSurahs(): Promise<QuranSurah[]> {
  * Fetch Uthmani Script Verses for a Surah directly from Quran Foundation API
  */
 export async function getQuranFoundationVerses(chapterNumber: number) {
+  const baseUrl = getQuranFoundationBaseUrl();
   try {
     const res = await fetch(
-      `https://api.quran.com/api/v4/quran/verses/uthmani?chapter_number=${chapterNumber}`,
-      { next: { revalidate: 86400 } }
+      `${baseUrl}/quran/verses/uthmani?chapter_number=${chapterNumber}`,
+      {
+        headers: getQuranFoundationHeaders(),
+        next: { revalidate: 86400 },
+      }
     );
     if (res.ok) {
       const data = await res.json();
