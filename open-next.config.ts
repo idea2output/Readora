@@ -11,12 +11,18 @@ const config: OpenNextConfig = {
       queue: "dummy",
     },
   },
+  edgeExternals: ["node:crypto"],
   middleware: {
-    external: false,
+    external: true,
+    override: {
+      wrapper: "cloudflare-edge",
+      converter: "edge",
+      proxyExternalRequest: "fetch",
+      incrementalCache: "dummy",
+      tagCache: "dummy",
+      queue: "dummy",
+    },
   },
-  cloudflare: {
-    dangerousDisableConfigValidation: true,
-  },
-} as any;
+};
 
 export default config;

@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 import { generateCompletion } from '@/lib/ai/ai-provider';
 import { verifyAiAllowedForBook } from '@/lib/ai/guard';
 
-export const runtime = 'edge';
 
 function getSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

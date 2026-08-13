@@ -5,6 +5,18 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 
+// Prevent Next.js 16 setImmediate assignment TypeError on Cloudflare Workers
+if (typeof globalThis !== "undefined") {
+  try {
+    const orig = globalThis.setImmediate;
+    Object.defineProperty(globalThis, "setImmediate", {
+      value: orig || ((fn: Function, ...args: any[]) => setTimeout(fn, 0, ...args)),
+      writable: true,
+      configurable: true,
+    });
+  } catch (_) {}
+}
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",

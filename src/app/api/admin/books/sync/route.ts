@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const runtime = 'edge';
 
 function splitIntoChapters(content: string, isHtml = true) {
   if (!content) return [];

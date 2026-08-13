@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { generateCompletion } from '@/lib/ai/ai-provider';
 import { verifyAiAllowedForBook } from '@/lib/ai/guard';
 
-export const runtime = 'edge';
 
 export async function POST(request: Request) {
   try {
