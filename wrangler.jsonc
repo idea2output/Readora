@@ -1,13 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "literary-harbor",
-  "main": ".open-next/worker.js",
   "compatibility_date": "2026-08-13",
   "compatibility_flags": [
     "nodejs_compat"
   ],
   "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "directory": ".next"
   }
 }
