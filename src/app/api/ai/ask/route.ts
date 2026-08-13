@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { askTheBook } from '@/lib/ai/rag-engine';
 import { verifyAiAllowedForBook } from '@/lib/ai/guard';
 
+export const runtime = 'edge';
+
 export async function POST(request: Request) {
   try {
     const { bookId, question } = await request.json();

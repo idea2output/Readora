@@ -1,9 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
 export interface SystemSettings {
   monetization_enabled: string;
   ai_provider: string;
@@ -15,6 +11,19 @@ export interface SystemSettings {
   stripe_secret_key: string;
   chunk_size_tokens: number;
   daily_user_quota: number;
+}
+
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Supabase environment variables are missing');
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey);
 }
 
 export async function getSystemSettings(): Promise<SystemSettings> {
@@ -32,7 +41,12 @@ export async function getSystemSettings(): Promise<SystemSettings> {
   };
 
   try {
-    const { data, error } = await supabase.from('system_settings').select('key, value');
+    const supabase = getSupabase();
+
+    const { data, error } = await supabase
+      .from('system_settings')
+      .select('key, value');
+
     if (!error && data) {
       data.forEach(item => {
         if (item.value && item.value.trim() !== '') {
@@ -44,8 +58,12 @@ export async function getSystemSettings(): Promise<SystemSettings> {
           if (item.key === 'gemini_api_key') defaults.gemini_api_key = item.value;
           if (item.key === 'resend_api_key') defaults.resend_api_key = item.value;
           if (item.key === 'stripe_secret_key') defaults.stripe_secret_key = item.value;
-          if (item.key === 'chunk_size_tokens') defaults.chunk_size_tokens = parseInt(item.value) || 750;
-          if (item.key === 'daily_user_quota') defaults.daily_user_quota = parseInt(item.value) || 50;
+          if (item.key === 'chunk_size_tokens') {
+            defaults.chunk_size_tokens = parseInt(item.value) || 750;
+          }
+          if (item.key === 'daily_user_quota') {
+            defaults.daily_user_quota = parseInt(item.value) || 50;
+          }
         }
       });
     }
@@ -56,22 +74,29 @@ export async function getSystemSettings(): Promise<SystemSettings> {
   return defaults;
 }
 
-export async function updateSystemSettings(settings: Partial<SystemSettings>): Promise<boolean> {
+export async function updateSystemSettings(
+  settings: Partial<SystemSettings>
+): Promise<boolean> {
   try {
+    const supabase = getSupabase();
+
     const entries = Object.entries(settings);
+
     for (const [key, value] of entries) {
       if (value !== undefined) {
         const isSecret = key.includes('api_key');
+
         await supabase
           .from('system_settings')
           .upsert({
             key,
             value: String(value),
             is_secret: isSecret,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           });
       }
     }
+
     return true;
   } catch (err) {
     console.error('Error updating system settings:', err);
