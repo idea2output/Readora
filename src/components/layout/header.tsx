@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSelector } from "@/components/layout/language-selector";
 import { SearchInput } from "@/components/ui/search-input";
 import { Anchor, ShieldCheck, GraduationCap, User, LogOut, BookMarked } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
@@ -77,10 +78,15 @@ export function Header() {
         </nav>
 
         {/* Right Tools & User Auth State */}
-        <div className="flex items-center space-x-3">
-          <div className="w-full max-w-[180px] lg:max-w-[220px] hidden sm:block">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-full max-w-[160px] lg:max-w-[200px] hidden sm:block">
             <SearchInput placeholder="Search books, DOIs..." />
           </div>
+
+          {/* Top 10 Language Selector (Google Translate Engine) */}
+          <LanguageSelector />
+
+          {/* Theme Toggle */}
           <ThemeToggle />
 
           {!loading && (
