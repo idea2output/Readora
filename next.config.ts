@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Ensure all packages are bundled for Cloudflare Workers (no runtime external imports)
+  bundlePagesRouterDependencies: true,
   images: {
     remotePatterns: [
       {
