@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/admin/audit": {},
+    "/api/admin/books/import": {},
+    "/api/admin/books/list": {},
+    "/api/admin/books/search": {},
+    "/api/admin/books/status": {},
+    "/api/admin/books/sync": {},
+    "/api/admin/settings": {},
+    "/api/admin/users": {},
+    "/api/ai/ask": {},
+    "/api/ai/characters": {},
+    "/api/ai/explain": {},
+    "/api/ai/summary": {},
+    "/api/books/request": {},
+    "/api/geo/check": {},
+    "/api/rights/report": {},
+    "/api/stripe/checkout": {},
+    "/api/stripe/webhook": {}
+  }
+}
