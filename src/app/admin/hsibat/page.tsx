@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Download, RefreshCw, CheckCircle2, Clock, BookOpen, Sparkles, Layers, Library, Lock, KeyRound, Settings2, Cpu, Save, ShieldAlert, Users, ShieldCheck, FileText, Ban, Trash2, ToggleLeft, ToggleRight, CreditCard, Building2, History } from "lucide-react";
+import { Search, Download, RefreshCw, CheckCircle2, Clock, BookOpen, Sparkles, Layers, Library, Lock, KeyRound, Settings2, Cpu, Save, ShieldAlert, Users, ShieldCheck, FileText, Ban, Trash2, ToggleLeft, ToggleRight, CreditCard, Building2, History, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -860,7 +860,74 @@ export default function AdminHsibatPage() {
         </TabsContent>
 
         {/* TAB 5: AI & SYSTEM CONFIGURATIONS */}
-        <TabsContent value="settings">
+        <TabsContent value="settings" className="space-y-8">
+          {/* Website Languages Management Matrix */}
+          <Card className="rounded-3xl shadow-xl max-w-3xl border-primary/20">
+            <CardHeader className="p-8 border-b">
+              <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                <Globe className="w-6 h-6 text-primary" />
+                Website Languages Control (Top 10 Global Languages)
+              </CardTitle>
+              <CardDescription>
+                Enable or Disable specific website translation languages for visitors. Disabled languages are immediately hidden from the header language selector.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-8 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { code: "en", name: "English", flag: "🇬🇧" },
+                  { code: "es", name: "Español", flag: "🇪🇸" },
+                  { code: "fr", name: "Français", flag: "🇫🇷" },
+                  { code: "de", name: "Deutsch", flag: "🇩🇪" },
+                  { code: "zh-CN", name: "中文 (Chinese)", flag: "🇨🇳" },
+                  { code: "ar", name: "العربية (Arabic)", flag: "🇸🇦" },
+                  { code: "hi", name: "हिन्दी (Hindi)", flag: "🇮🇳" },
+                  { code: "pt", name: "Português", flag: "🇧🇷" },
+                  { code: "ru", name: "Русский (Russian)", flag: "🇷🇺" },
+                  { code: "ja", name: "日本語 (Japanese)", flag: "🇯🇵" },
+                ].map((lang) => {
+                  const saved = typeof window !== "undefined" ? localStorage.getItem("enabled_website_languages") : null;
+                  const currentEnabled: string[] = saved ? JSON.parse(saved) : ["en", "es", "fr", "de", "zh-CN", "ar", "hi", "pt", "ru", "ja"];
+                  const isEnabled = currentEnabled.includes(lang.code);
+
+                  const toggleLang = (code: string) => {
+                    let updated: string[];
+                    if (isEnabled) {
+                      updated = currentEnabled.filter((c) => c !== code);
+                    } else {
+                      updated = [...currentEnabled, code];
+                    }
+                    if (updated.length === 0) updated = ["en"]; // Always keep English
+                    localStorage.setItem("enabled_website_languages", JSON.stringify(updated));
+                    window.location.reload();
+                  };
+
+                  return (
+                    <div key={lang.code} className="p-4 rounded-2xl bg-card border flex items-center justify-between shadow-sm">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xl">{lang.flag}</span>
+                        <span className="font-bold text-sm">{lang.name}</span>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={isEnabled ? "default" : "outline"}
+                        onClick={() => toggleLang(lang.code)}
+                        className="rounded-full text-xs font-bold gap-1 px-3 py-1"
+                      >
+                        {isEnabled ? <ToggleRight className="w-4 h-4 text-emerald-400" /> : <ToggleLeft className="w-4 h-4" />}
+                        {isEnabled ? "Enabled" : "Disabled"}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground text-center font-medium pt-2">
+                Changes apply instantly across the entire platform and header navigation bar.
+              </p>
+            </CardContent>
+          </Card>
+
           <Card className="rounded-3xl shadow-xl max-w-3xl border-primary/20">
             <CardHeader className="p-8 border-b">
               <CardTitle className="text-2xl font-bold flex items-center gap-2">

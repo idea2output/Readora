@@ -1,30 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Globe } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useState, useEffect, useRef } from "react";
+import { Globe, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const TOP_10_LANGUAGES = [
+export const TOP_10_LANGUAGES = [
   { code: "en", name: "English", flag: "🇬🇧" },
   { code: "es", name: "Español", flag: "🇪🇸" },
   { code: "fr", name: "Français", flag: "🇫🇷" },
   { code: "de", name: "Deutsch", flag: "🇩🇪" },
-  { code: "zh-CN", name: "中文 (Chinese)", flag: "🇨🇳" },
-  { code: "ar", name: "العربية (Arabic)", flag: "🇸🇦" },
-  { code: "hi", name: "हिन्दी (Hindi)", flag: "🇮🇳" },
+  { code: "zh-CN", name: "中文", flag: "🇨🇳" },
+  { code: "ar", name: "العربية", flag: "🇸🇦" },
+  { code: "hi", name: "हिन्दी", flag: "🇮🇳" },
   { code: "pt", name: "Português", flag: "🇧🇷" },
-  { code: "ru", name: "Русский (Russian)", flag: "🇷🇺" },
-  { code: "ja", name: "日本語 (Japanese)", flag: "🇯🇵" },
+  { code: "ru", name: "Русский", flag: "🇷🇺" },
+  { code: "ja", name: "日本語", flag: "🇯🇵" },
 ];
 
 export function LanguageSelector() {
   const [selectedLang, setSelectedLang] = useState("en");
+  const [enabledCodes, setEnabledCodes] = useState<string[]>(TOP_10_LANGUAGES.map(l => l.code));
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Load enabled languages from Admin settings / localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("enabled_website_languages");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setEnabledCodes(parsed);
+        }
+      }
+    } catch (_) {}
+  }, []);
+
+  // Filter languages to only display admin-enabled languages
+  const visibleLanguages = TOP_10_LANGUAGES.filter(l => enabledCodes.includes(l.code));
 
   // Load Google Translate script dynamically
   useEffect(() => {
@@ -40,16 +53,28 @@ export function LanguageSelector() {
       new (window as any).google.translate.TranslateElement(
         {
           pageLanguage: "en",
-          includedLanguages: "en,es,fr,de,zh-CN,ar,hi,pt,ru,ja",
+          includedLanguages: visibleLanguages.map(l => l.code).join(","),
           autoDisplay: false,
         },
         "google_translate_element"
       );
     };
+  }, [visibleLanguages]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const changeLanguage = (langCode: string) => {
     setSelectedLang(langCode);
+    setIsOpen(false);
     
     // Trigger Google Translate select change via cookie / iframe
     const selectElem = document.querySelector(".goog-te-combo") as HTMLSelectElement;
@@ -64,41 +89,50 @@ export function LanguageSelector() {
     }
   };
 
-  const currentLang = TOP_10_LANGUAGES.find((l) => l.code === selectedLang) || TOP_10_LANGUAGES[0];
+  const currentLang = visibleLanguages.find((l) => l.code === selectedLang) || visibleLanguages[0] || TOP_10_LANGUAGES[0];
+
+  if (visibleLanguages.length === 0) return null;
 
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block" ref={dropdownRef}>
       {/* Hidden Google Translate element mount target */}
       <div id="google_translate_element" className="hidden opacity-0 pointer-events-none w-0 h-0 overflow-hidden" />
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-9 gap-1.5 px-2.5 font-semibold text-xs rounded-full border border-border/40 hover:bg-muted">
-            <Globe className="w-4 h-4 text-primary" />
-            <span className="hidden sm:inline">{currentLang.flag} {currentLang.name.split(" ")[0]}</span>
-            <span className="sm:hidden">{currentLang.flag}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-44 rounded-2xl p-1.5 shadow-xl border">
-          <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-b mb-1">
-            Translate Page (Top 10)
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setIsOpen(!isOpen)}
+        className="h-9 gap-1.5 px-2.5 font-semibold text-xs rounded-full border border-border/60 hover:bg-muted transition-all"
+      >
+        <Globe className="w-4 h-4 text-primary" />
+        <span className="hidden sm:inline">{currentLang.flag} {currentLang.name}</span>
+        <span className="sm:hidden">{currentLang.flag}</span>
+        <ChevronDown className="w-3 h-3 opacity-60" />
+      </Button>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 rounded-2xl p-1.5 bg-popover text-popover-foreground border shadow-xl z-50 animate-in fade-in zoom-in-95 duration-150">
+          <div className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-b mb-1">
+            Website Languages
           </div>
-          {TOP_10_LANGUAGES.map((lang) => (
-            <DropdownMenuItem
-              key={lang.code}
-              onClick={() => changeLanguage(lang.code)}
-              className={`rounded-xl text-xs font-semibold px-2.5 py-1.5 cursor-pointer flex items-center justify-between ${
-                selectedLang === lang.code ? "bg-primary/10 text-primary font-bold" : ""
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <span>{lang.flag}</span>
-                <span>{lang.name}</span>
-              </span>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <div className="max-h-64 overflow-y-auto space-y-0.5">
+            {visibleLanguages.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => changeLanguage(lang.code)}
+                className={`w-full rounded-xl text-xs font-semibold px-3 py-2 text-left transition-colors flex items-center justify-between hover:bg-accent hover:text-accent-foreground ${
+                  selectedLang === lang.code ? "bg-primary/10 text-primary font-bold" : ""
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <span>{lang.flag}</span>
+                  <span>{lang.name}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
