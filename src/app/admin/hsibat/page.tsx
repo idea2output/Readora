@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Download, RefreshCw, CheckCircle2, Clock, BookOpen, Sparkles, Layers, Library, Lock, KeyRound, Settings2, Cpu, Save, ShieldAlert, Users, ShieldCheck, FileText, Ban, Trash2, ToggleLeft, ToggleRight, CreditCard, Building2, History, Globe } from "lucide-react";
+import { Search, Download, RefreshCw, CheckCircle2, Clock, BookOpen, Sparkles, Layers, Library, Lock, KeyRound, Settings2, Cpu, Save, ShieldAlert, Users, ShieldCheck, FileText, Ban, Trash2, ToggleLeft, ToggleRight, CreditCard, Building2, History, Globe, Play, Pause, Terminal, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,6 +71,18 @@ export default function AdminHsibatPage() {
   const [loadingLocal, setLoadingLocal] = useState(true);
   const [syncingBookId, setSyncingBookId] = useState<string | null>(null);
   const [syncMessages, setSyncMessages] = useState<{ [id: string]: string }>({});
+
+  // Auto-Sync Engine State
+  const [autoSyncRunning, setAutoSyncRunning] = useState(false);
+  const [autoSyncProgress, setAutoSyncProgress] = useState({ current: 0, total: 0, currentTitle: "" });
+  const [autoSyncLogs, setAutoSyncLogs] = useState<string[]>([]);
+  const [forceReSyncAll, setForceReSyncAll] = useState(false);
+  const stopAutoSyncRef = useRef(false);
+
+  const addAutoSyncLog = (msg: string) => {
+    const timeStr = new Date().toLocaleTimeString();
+    setAutoSyncLogs(prev => [`[${timeStr}] ${msg}`, ...prev.slice(0, 49)]);
+  };
 
   // Users State
   const [usersList, setUsersList] = useState<UserRecord[]>([]);
@@ -347,6 +359,64 @@ export default function AdminHsibatPage() {
     }
   };
 
+  const handleStartAutoSync = async () => {
+    if (autoSyncRunning) return;
+
+    const targetBooks = localBooks.filter(b => forceReSyncAll || (b.chapterCount === undefined || b.chapterCount <= 1));
+    if (targetBooks.length === 0) {
+      addAutoSyncLog("ℹ️ No unsynced books found in catalog.");
+      return;
+    }
+
+    stopAutoSyncRef.current = false;
+    setAutoSyncRunning(true);
+    setAutoSyncProgress({ current: 0, total: targetBooks.length, currentTitle: targetBooks[0].title });
+    addAutoSyncLog(`🚀 Starting Background Auto-Sync Worker for ${targetBooks.length} books...`);
+
+    for (let i = 0; i < targetBooks.length; i++) {
+      if (stopAutoSyncRef.current) {
+        addAutoSyncLog("⏸️ Auto-Sync Worker paused by administrator.");
+        break;
+      }
+
+      const book = targetBooks[i];
+      setAutoSyncProgress({ current: i + 1, total: targetBooks.length, currentTitle: book.title });
+      addAutoSyncLog(`🔄 (${i + 1}/${targetBooks.length}) Downloading & splitting "${book.title}"...`);
+
+      try {
+        const res = await fetch("/api/admin/books/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookId: book.id }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          addAutoSyncLog(`✅ Synced ${data.chapterCount} real chapters for "${book.title}"!`);
+          fetchLocalBooks();
+        } else {
+          addAutoSyncLog(`❌ Failed "${book.title}": ${data.error || "Sync error"}`);
+        }
+      } catch (err: any) {
+        addAutoSyncLog(`❌ Error "${book.title}": ${err.message}`);
+      }
+
+      if (i < targetBooks.length - 1 && !stopAutoSyncRef.current) {
+        await new Promise(r => setTimeout(r, 1500));
+      }
+    }
+
+    setAutoSyncRunning(false);
+    if (!stopAutoSyncRef.current) {
+      addAutoSyncLog("🎉 Auto-Sync Engine finished all queued books!");
+    }
+  };
+
+  const handleStopAutoSync = () => {
+    stopAutoSyncRef.current = true;
+    addAutoSyncLog("🛑 Pause signal sent. Worker stopping after current book...");
+  };
+
   if (!authenticated) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center p-4">
@@ -572,6 +642,109 @@ export default function AdminHsibatPage() {
 
             {/* Book Curation & Soft Delete Manager (5 cols) */}
             <div className="lg:col-span-5 space-y-6">
+              {/* Background Auto-Sync Engine Card */}
+              <Card className="rounded-3xl shadow-lg border-indigo-500/20 bg-gradient-to-br from-card to-indigo-950/10 overflow-hidden">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-bold flex items-center gap-2">
+                      <Cpu className="w-5 h-5 text-indigo-500 animate-pulse" />
+                      Background Auto-Sync Engine
+                    </CardTitle>
+
+                    <Badge variant={autoSyncRunning ? "default" : "outline"} className="text-xs gap-1">
+                      {autoSyncRunning ? (
+                        <>
+                          <RefreshCw className="w-3 h-3 animate-spin text-indigo-400" />
+                          Syncing ({autoSyncProgress.current}/{autoSyncProgress.total})
+                        </>
+                      ) : (
+                        "Worker Idle"
+                      )}
+                    </Badge>
+                  </div>
+                  <CardDescription className="text-xs">
+                    Automatically downloads full text & splits real chapters for all imported books in the background.
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  {/* Unsynced Counter Stats */}
+                  <div className="grid grid-cols-2 gap-2 text-center text-xs">
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold">
+                      {localBooks.filter(b => (b.chapterCount === undefined || b.chapterCount <= 1)).length} Unsynced Books
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold">
+                      {localBooks.filter(b => b.chapterCount && b.chapterCount > 1).length} Fully Synced
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  {autoSyncRunning && (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs font-semibold">
+                        <span className="truncate max-w-[200px] text-muted-foreground">{autoSyncProgress.currentTitle}</span>
+                        <span>{Math.round((autoSyncProgress.current / (autoSyncProgress.total || 1)) * 100)}%</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full bg-indigo-500 transition-all duration-300 rounded-full"
+                          style={{ width: `${(autoSyncProgress.current / (autoSyncProgress.total || 1)) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Controls */}
+                  <div className="flex items-center justify-between gap-2 pt-1">
+                    <label className="flex items-center gap-2 text-xs font-medium cursor-pointer text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={forceReSyncAll}
+                        onChange={(e) => setForceReSyncAll(e.target.checked)}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      Force re-sync all
+                    </label>
+
+                    {autoSyncRunning ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleStopAutoSync}
+                        className="rounded-full text-xs gap-1.5 px-4 text-red-500 border-red-500/30 hover:bg-red-500/10"
+                      >
+                        <Pause className="w-3.5 h-3.5" /> Pause Worker
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={handleStartAutoSync}
+                        className="rounded-full text-xs gap-1.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" /> Start Auto-Sync
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Terminal Log Console */}
+                  <div className="rounded-2xl bg-slate-950 p-3 text-[11px] font-mono text-emerald-400 space-y-1 border border-slate-800 max-h-36 overflow-y-auto">
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 pb-1 border-b border-slate-800 mb-1">
+                      <span className="flex items-center gap-1"><Terminal className="w-3 h-3" /> Worker Activity Console</span>
+                      {autoSyncLogs.length > 0 && (
+                        <button onClick={() => setAutoSyncLogs([])} className="hover:text-slate-300">Clear</button>
+                      )}
+                    </div>
+                    {autoSyncLogs.length === 0 ? (
+                      <p className="text-slate-600 italic">No activity yet. Click "Start Auto-Sync" to begin background processing.</p>
+                    ) : (
+                      autoSyncLogs.map((log, idx) => (
+                        <p key={idx} className="leading-tight">{log}</p>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card className="rounded-3xl shadow-lg border-primary/10">
                 <CardHeader>
                   <div className="flex items-center justify-between">
