@@ -7,9 +7,27 @@ import { getFeaturedBooks, getBooksByCategory, getTotalBooksCount } from "@/lib/
 import { FullHeroCarousel } from "@/components/home/full-hero-carousel"
 
 export default async function Home() {
-  const featuredBooks = await getFeaturedBooks(6) || [];
-  const sacredTexts = await getBooksByCategory('sacred-texts-religion', 6) || [];
-  const totalBooksCount = await getTotalBooksCount();
+  let featuredBooks: any[] = [];
+  let sacredTexts: any[] = [];
+  let totalBooksCount = 1248;
+
+  try {
+    featuredBooks = (await getFeaturedBooks(6)) || [];
+  } catch (err) {
+    console.error("Home: Error fetching featured books:", err);
+  }
+
+  try {
+    sacredTexts = (await getBooksByCategory('sacred-texts-religion', 6)) || [];
+  } catch (err) {
+    console.error("Home: Error fetching sacred texts:", err);
+  }
+
+  try {
+    totalBooksCount = await getTotalBooksCount();
+  } catch (err) {
+    console.error("Home: Error fetching total books count:", err);
+  }
 
   return (
     <div className="flex flex-col min-h-screen">

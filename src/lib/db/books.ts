@@ -1,4 +1,13 @@
-import { createClient } from '@/utils/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+
+const DEFAULT_URL = "https://dxtdkmszrgwncxuukpor.supabase.co";
+const DEFAULT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dGRrbXN6cmd3bmN4dXVrcG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0Njg2OTgsImV4cCI6MjEwMjA0NDY5OH0.GkFXEllSK-x1Ojpa8ui69gSjRK64YbsGPaAQYRMoeio";
+
+function getPublicClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_KEY;
+  return createSupabaseClient(url, key);
+}
 
 const SACRED_TEXT_FALLBACKS: Record<string, any> = {
   "holy-quran-arabic": {
@@ -229,38 +238,47 @@ const SACRED_TEXT_FALLBACKS: Record<string, any> = {
 };
 
 export async function getFeaturedBooks(limit = 6) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('books')
-    .select(`
-      id, title, slug, cover_url, author_id, genre, description,
-      authors ( name, slug )
-    `)
-    .eq('status', 'published')
-    .limit(limit);
+  try {
+    const supabase = getPublicClient();
+    const { data, error } = await supabase
+      .from('books')
+      .select(`
+        id, title, slug, cover_url, author_id, genre, description,
+        authors ( name, slug )
+      `)
+      .eq('status', 'published')
+      .limit(limit);
 
-  if (error) {
-    console.error('Supabase Error (getFeaturedBooks):', error);
+    if (error) {
+      console.error('Supabase Error (getFeaturedBooks):', error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error('Failed to execute getFeaturedBooks:', err);
     return [];
   }
-  return data;
 }
 
 export async function getBookBySlug(slug: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('books')
-    .select(`
-      *,
-      authors ( name, slug, biography ),
-      book_categories (
-        categories ( name, slug )
-      )
-    `)
-    .eq('slug', slug)
-    .single();
+  try {
+    const supabase = getPublicClient();
+    const { data, error } = await supabase
+      .from('books')
+      .select(`
+        *,
+        authors ( name, slug, biography ),
+        book_categories (
+          categories ( name, slug )
+        )
+      `)
+      .eq('slug', slug)
+      .single();
 
-  if (!error && data) return data;
+    if (!error && data) return data;
+  } catch (err) {
+    console.error(`Failed to fetch book slug ${slug}:`, err);
+  }
 
   // Fallback lookup for Sacred Texts catalog
   if (SACRED_TEXT_FALLBACKS[slug]) {
@@ -271,57 +289,67 @@ export async function getBookBySlug(slug: string) {
 }
 
 export async function searchBooks(query: string, page = 1, limit = 12) {
-  const supabase = await createClient();
-  const from = (page - 1) * limit;
-  const to = from + limit - 1;
+  try {
+    const supabase = getPublicClient();
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
 
-  let request = supabase
-    .from('books')
-    .select(`
-      id, title, slug, cover_url, author_id, genre, description,
-      authors ( name, slug )
-    `, { count: 'exact' })
-    .eq('status', 'published');
+    let request = supabase
+      .from('books')
+      .select(`
+        id, title, slug, cover_url, author_id, genre, description,
+        authors ( name, slug )
+      `, { count: 'exact' })
+      .eq('status', 'published');
 
-  if (query) {
-    request = request.textSearch('fts', query.split(' ').join(' | '));
-  }
+    if (query) {
+      request = request.textSearch('fts', query.split(' ').join(' | '));
+    }
 
-  const { data, count, error } = await request.range(from, to);
-  
-  if (error) {
-    console.error('Supabase Error (searchBooks):', error);
+    const { data, count, error } = await request.range(from, to);
+    
+    if (error) {
+      console.error('Supabase Error (searchBooks):', error);
+      return { data: [], count: 0 };
+    }
+    return { data: data || [], count: count || 0 };
+  } catch (err) {
+    console.error('Failed to execute searchBooks:', err);
     return { data: [], count: 0 };
   }
-  return { data, count };
 }
 
 export async function getBooksByCategory(categorySlug: string, limit = 6) {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('books')
-    .select(`
-      id, title, slug, cover_url, author_id, genre, description,
-      authors ( name, slug ),
-      book_categories!inner (
-        categories!inner ( slug )
-      )
-    `)
-    .eq('status', 'published')
-    .eq('book_categories.categories.slug', categorySlug)
-    .limit(limit);
+  try {
+    const supabase = getPublicClient();
+    
+    const { data, error } = await supabase
+      .from('books')
+      .select(`
+        id, title, slug, cover_url, author_id, genre, description,
+        authors ( name, slug ),
+        book_categories!inner (
+          categories!inner ( slug )
+        )
+      `)
+      .eq('status', 'published')
+      .eq('book_categories.categories.slug', categorySlug)
+      .limit(limit);
 
-  if (error) {
-    console.error('Supabase Error (getBooksByCategory):', error);
+    if (error) {
+      console.error('Supabase Error (getBooksByCategory):', error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error(`Failed to execute getBooksByCategory for ${categorySlug}:`, err);
     return [];
   }
-  return data;
 }
 
 export async function getTotalBooksCount() {
   try {
-    const supabase = await createClient();
+    const supabase = getPublicClient();
     const { count, error } = await supabase
       .from('books')
       .select('*', { count: 'exact', head: true });
