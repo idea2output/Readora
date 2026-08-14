@@ -31,6 +31,7 @@ export function Footer() {
             <h4 className="font-bold text-xs uppercase tracking-wider text-foreground">Rights & Governance</h4>
             <ul className="space-y-1.5 text-[11px]">
               <li><Link href="/rights" className="hover:underline flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-green-600" /> Rights & Legal Policy</Link></li>
+              <li><Link href="/contributors" className="hover:underline flex items-center gap-1"><HeartHandshake className="w-3 h-3 text-purple-500" /> Contributors & Honor Roll</Link></li>
               <li><Link href="/rights#takedown" className="hover:underline">Takedown Procedure</Link></li>
               <li><Link href="/rights#attribution" className="hover:underline">Attribution Policy</Link></li>
               <li><Link href="/rights#geo" className="hover:underline">Geographic Restrictions</Link></li>

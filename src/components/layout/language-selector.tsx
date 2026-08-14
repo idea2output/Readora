@@ -61,6 +61,24 @@ export function LanguageSelector() {
     };
   }, [visibleLanguages]);
 
+  // Continuously remove Google Translate top banner & enforce body top 0px silently
+  useEffect(() => {
+    const removeGoogleBanner = () => {
+      const banner = document.querySelector(".goog-te-banner-frame") as HTMLElement;
+      if (banner) {
+        banner.style.setProperty("display", "none", "important");
+        banner.style.setProperty("visibility", "hidden", "important");
+        banner.style.setProperty("height", "0px", "important");
+      }
+      if (document.body.style.top !== "0px") {
+        document.body.style.setProperty("top", "0px", "important");
+      }
+    };
+
+    const interval = setInterval(removeGoogleBanner, 200);
+    return () => clearInterval(interval);
+  }, []);
+
   // Close dropdown on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

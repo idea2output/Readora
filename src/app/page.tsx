@@ -6,6 +6,9 @@ import { BookOpen, Building2 } from "lucide-react"
 import { getFeaturedBooks, getBooksByCategory, getTotalBooksCount } from "@/lib/db/books"
 import { FullHeroCarousel } from "@/components/home/full-hero-carousel"
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function Home() {
   let featuredBooks: any[] = [];
   let sacredTexts: any[] = [];

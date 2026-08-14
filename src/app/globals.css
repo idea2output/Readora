@@ -113,5 +113,57 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    top: 0px !important;
+    position: static !important;
+  }
+  /* Official Quran Foundation QPC Hafs Font */
+  @font-face {
+    font-family: "QPC Hafs";
+    src: url("https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2") format("woff2");
+    font-display: swap;
+  }
+
+  .quran-text {
+    font-family: "QPC Hafs", "Amiri Quran", "Noto Naskh Arabic", serif;
+    direction: rtl;
+    text-align: right;
+    line-height: 2.15;
+    font-size: clamp(1.7rem, 3vw, 2.5rem);
+  }
+
+  .notranslate {
+    translate: no;
   }
 }
+
+/* Hide Google Translate top banner bar & popups silently */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+.skiptranslate > iframe,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.goog-te-spinner-pos,
+#goog-gt- {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Hide Google Translate gadgets & tooltips */
+.goog-te-gadget,
+.goog-te-gadget-simple,
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+
+/* Remove yellow text highlights caused by Google Translate */
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+

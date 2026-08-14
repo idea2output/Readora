@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 
 
@@ -49,83 +50,58 @@ export async function POST(request: Request) {
         .from('authors')
         .insert({
           name: gAuthor.name,
-          slug: `${authorSlugBase}-${Math.floor(Math.random() * 10000)}`,
-          birth_year: gAuthor.birth_year || null,
-          death_year: gAuthor.death_year || null,
+          slug: `${authorSlugBase}-${Date.now().toString().slice(-4)}`
         })
         .select('id')
         .single();
 
-      if (authorErr) {
-        return NextResponse.json({ error: `Author error: ${authorErr.message}` }, { status: 500 });
+      if (authorErr || !newAuthor) {
+        return NextResponse.json({ error: `Failed to create author: ${authorErr?.message}` }, { status: 500 });
       }
       authorId = newAuthor.id;
     }
 
-    // 2. Check or Insert Book
-    const bookSlugBase = generateSlug(gBook.title);
-    const bookSlug = `${bookSlugBase}-${gBook.id}`;
-
-    // Check if book already exists
-    const { data: existingBook } = await supabase
-      .from('books')
-      .select('id, title, slug')
-      .eq('slug', bookSlug)
-      .maybeSingle();
-
-    if (existingBook) {
-      return NextResponse.json({ message: 'Book already imported', book: existingBook });
-    }
-
-    const coverUrl = gBook.formats['image/jpeg'] || null;
-    const gutenbergSourceUrl = `https://www.gutenberg.org/ebooks/${gBook.id}`;
-    
-    // Primary genre/subjects
-    const subjects = gBook.subjects || [];
-    const mainGenre = subjects[0] ? subjects[0].split(' -- ')[0] : 'General Fiction';
-
+    // 2. Insert Book
+    const titleSlugBase = generateSlug(gBook.title);
     const { data: newBook, error: bookErr } = await supabase
       .from('books')
       .insert({
         title: gBook.title,
-        slug: bookSlug,
+        slug: `${titleSlugBase}-${Date.now().toString().slice(-4)}`,
         author_id: authorId,
-        cover_url: coverUrl,
-        genre: mainGenre,
-        language: gBook.languages ? gBook.languages[0] : 'en',
-        copyright_status: gBook.copyright ? 'copyrighted' : 'public_domain',
+        cover_url: gBook.formats['image/jpeg'] || null,
+        language: gBook.languages && gBook.languages.length > 0 ? gBook.languages[0] : 'en',
+        genre: gBook.bookshelves && gBook.bookshelves.length > 0 ? gBook.bookshelves[0].replace('Browsing: ', '') : 'Classic Literature',
+        copyright_status: 'public_domain',
         status: 'published',
-        description: gBook.summaries && gBook.summaries.length > 0
-          ? gBook.summaries[0]
-          : `A classic work by ${gAuthor.name}, available free via Project Gutenberg.`,
-        source_url: gutenbergSourceUrl,
+        source_url: `https://www.gutenberg.org/ebooks/${gBook.id}`
       })
-      .select('*')
+      .select('id, title, slug')
       .single();
 
-    if (bookErr) {
-      return NextResponse.json({ error: `Book insert error: ${bookErr.message}` }, { status: 500 });
+    if (bookErr || !newBook) {
+      return NextResponse.json({ error: `Failed to insert book: ${bookErr?.message}` }, { status: 500 });
     }
 
     // 3. Link Categories
-    const categorySubjects = subjects.slice(0, 3);
-    for (const subj of categorySubjects) {
-      const cleanCatName = subj.split(' -- ')[0];
-      const catSlugBase = generateSlug(cleanCatName);
+    if (gBook.subjects && gBook.subjects.length > 0) {
+      const subjectName = gBook.subjects[0].split('--')[0].trim();
+      const catSlug = generateSlug(subjectName);
 
       let { data: existingCat } = await supabase
         .from('categories')
         .select('id')
-        .ilike('name', cleanCatName)
+        .ilike('name', subjectName)
         .maybeSingle();
 
       let catId = existingCat?.id;
+
       if (!catId) {
         const { data: newCat } = await supabase
           .from('categories')
           .insert({
-            name: cleanCatName,
-            slug: `${catSlugBase}-${Math.floor(Math.random() * 1000)}`
+            name: subjectName,
+            slug: `${catSlug}-${Date.now().toString().slice(-4)}`
           })
           .select('id')
           .single();
@@ -150,6 +126,13 @@ export async function POST(request: Request) {
       title: 'Chapter 1',
       content: `<p class="italic text-muted-foreground">This book content is queued for background hydration from Gutenberg. Click "Sync Chapters" in Admin to load instantly!</p>`
     });
+
+    // Revalidate paths automatically so newly downloaded books appear instantly across the website
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/catalog');
+      revalidatePath('/search');
+    } catch (_) {}
 
     return NextResponse.json({ success: true, book: newBook });
   } catch (error: any) {

@@ -4,15 +4,20 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
-import { BookMarked, ShieldCheck, ArrowLeft, BookOpen, GitCompare } from "lucide-react";
+import { ShieldCheck, ArrowLeft, BookOpen, GitCompare, Sparkles } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
 
-const TRADITION_DETAILS: Record<string, { name: string; icon: string; description: string; sampleTexts: any[] }> = {
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const TRADITION_DETAILS: Record<string, { name: string; icon: string; description: string; keywords: string[]; sampleTexts: any[] }> = {
   islam: {
     name: "Islam",
     icon: "☪️",
     description: "Holy Quran, Hadith collections (Sahih al-Bukhari, Sahih Muslim), Tafsir commentaries, and classical Islamic literature.",
+    keywords: ["islam", "quran", "hadith", "bukhari", "muslim", "tafsir", "arabic"],
     sampleTexts: [
-      { id: "1", title: "The Holy Quran (القرآن الكريم)", originalLanguage: "Arabic (العربية)", edition: "Medina Mushaf Standard Edition", rights: "Public Domain / Verified Rights", slug: "holy-quran-arabic" },
+      { id: "1", title: "The Holy Quran (القرآن الكريم)", originalLanguage: "Arabic (العربية)", edition: "Medina Mushaf Standard Edition (Quran Foundation)", rights: "Public Domain / Verified Rights", slug: "holy-quran-arabic" },
       { id: "2", title: "Sahih al-Bukhari (صحيح البخاري)", originalLanguage: "Arabic (العربية)", edition: "Classical Hadith Collection", rights: "Public Domain", slug: "sahih-bukhari" },
       { id: "3", title: "Tafsir Ibn Kathir (تفسير ابن كثير)", originalLanguage: "Arabic (العربية)", edition: "Classical Exegesis & Commentary", rights: "Public Domain", slug: "tafsir-ibn-kathir" },
     ],
@@ -21,6 +26,7 @@ const TRADITION_DETAILS: Record<string, { name: string; icon: string; descriptio
     name: "Christianity",
     icon: "✝️",
     description: "Old Testament, New Testament, Gospels, early Church Fathers, historical theological monographs, and open biblical literature.",
+    keywords: ["christianity", "bible", "gospels", "testament", "augustine", "latin", "greek"],
     sampleTexts: [
       { id: "4", title: "The Holy Bible (King James Version)", originalLanguage: "Hebrew / Aramaic / Greek", edition: "KJV 1611 Edition", rights: "Public Domain", slug: "holy-bible-kjv" },
       { id: "5", title: "The Four Gospels (Evangelion)", originalLanguage: "Koine Greek (Ελληνική)", edition: "Textus Receptus Standard", rights: "Public Domain", slug: "gospels-greek" },
@@ -31,8 +37,9 @@ const TRADITION_DETAILS: Record<string, { name: string; icon: string; descriptio
     name: "Judaism",
     icon: "✡️",
     description: "Torah, Tanakh, Mishnah, Babylonian & Jerusalem Talmud, Midrash, and historical Jewish philosophy.",
+    keywords: ["judaism", "torah", "tanakh", "talmud", "hebrew", "maimonides"],
     sampleTexts: [
-      { id: "7", title: "The Torah (תּוֹرָה)", originalLanguage: "Hebrew (עברית)", edition: "Masoretic Text Edition", rights: "Public Domain", slug: "torah-hebrew" },
+      { id: "7", title: "The Torah (תּוֹרָה)", originalLanguage: "Hebrew (עברית)", edition: "Masoretic Text Edition", rights: "Public Domain", slug: "torah-hebrew" },
       { id: "8", title: "The Tanakh (תנ״ך)", originalLanguage: "Hebrew / Aramaic", edition: "Jewish Publication Society 1917", rights: "Public Domain", slug: "tanakh-jps" },
       { id: "9", title: "The Guide for the Perplexed (מורה נבוכים)", originalLanguage: "Judeo-Arabic", edition: "Maimonides Philosophical Work", rights: "Public Domain", slug: "guide-for-perplexed" },
     ],
@@ -41,6 +48,7 @@ const TRADITION_DETAILS: Record<string, { name: string; icon: string; descriptio
     name: "Hinduism",
     icon: "🕉️",
     description: "Vedas (Rigveda, Samaveda, Yajurveda, Atharvaveda), Upanishads, Bhagavad Gita, Puranas, Ramayana, and Mahabharata.",
+    keywords: ["hinduism", "vedas", "gita", "upanishads", "sanskrit", "ramayana"],
     sampleTexts: [
       { id: "10", title: "The Bhagavad Gita (श्रीमद्भगवद्गीता)", originalLanguage: "Sanskrit (संस्कृतम्)", edition: "Devanagari Verse & English", rights: "Public Domain", slug: "bhagavad-gita" },
       { id: "11", title: "The Rigveda (ऋग्वेद)", originalLanguage: "Vedic Sanskrit", edition: "Aufrecht / Max Müller Edition", rights: "Public Domain", slug: "rigveda-sanskrit" },
@@ -51,6 +59,7 @@ const TRADITION_DETAILS: Record<string, { name: string; icon: string; descriptio
     name: "Buddhism",
     icon: "☸️",
     description: "Pali Canon (Tipitaka), Vinaya, Sutta Pitaka, Abhidhamma, Mahayana Sutras, and Buddhist philosophical literature.",
+    keywords: ["buddhism", "dhammapada", "pali", "sutra", "buddhist"],
     sampleTexts: [
       { id: "13", title: "The Dhammapada", originalLanguage: "Pali", edition: "Theravada Canon", rights: "Public Domain", slug: "dhammapada-pali" },
       { id: "14", title: "The Lotus Sutra (妙法蓮華經)", originalLanguage: "Sanskrit / Classical Chinese", edition: "Kumarajiva Translation Edition", rights: "Public Domain", slug: "lotus-sutra" },
@@ -71,8 +80,29 @@ export default async function TraditionDetailPage({
     notFound();
   }
 
+  // Fetch books matching this tradition from Supabase
+  let dbBooks: any[] = [];
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://dummy.supabase.co";
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "dummy";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { data } = await supabase
+      .from('books')
+      .select('id, title, slug, cover_url, genre, authors(name)')
+      .eq('status', 'published')
+      .limit(50);
+
+    if (data) {
+      dbBooks = data.filter((b: any) => {
+        const titleMatch = detail.keywords.some(k => b.title?.toLowerCase().includes(k));
+        const genreMatch = detail.keywords.some(k => b.genre?.toLowerCase().includes(k));
+        return titleMatch || genreMatch;
+      });
+    }
+  } catch (_) {}
+
   return (
-    <div className="container mx-auto px-4 md:px-6 py-10 space-y-8">
+    <div className="container mx-auto px-4 md:px-6 py-10 space-y-8 max-w-7xl">
       <Link href="/sacred-texts" className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to Sacred Texts Catalog
       </Link>
@@ -92,7 +122,7 @@ export default async function TraditionDetailPage({
         </p>
       </div>
 
-      {/* AI Isolation Banner with Ultra-Sharp Contrast */}
+      {/* AI Isolation Banner */}
       <div className="p-4 rounded-2xl bg-amber-100 border border-amber-300 dark:bg-amber-950/60 dark:border-amber-700 text-amber-950 dark:text-amber-100 text-xs font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
@@ -106,18 +136,24 @@ export default async function TraditionDetailPage({
       </div>
 
       <div className="space-y-6">
-        <div className="flex items-center justify-between border-b pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
           <h2 className="font-serif text-2xl font-extrabold text-foreground">Available Sacred Works ({detail.name})</h2>
           <SearchInput placeholder={`Search ${detail.name} texts...`} className="max-w-xs text-xs" />
         </div>
 
+        {/* Canonical Sacred Texts & API Integrated Works */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {detail.sampleTexts.map((text) => (
             <Card key={text.id} className="rounded-3xl border shadow-md p-6 flex flex-col justify-between space-y-4 hover:border-amber-500/50 transition-all bg-card">
               <div className="space-y-2.5">
-                <Badge className="bg-amber-600 text-white font-bold border-0 text-[10px]">
-                  {text.originalLanguage}
-                </Badge>
+                <div className="flex items-center justify-between">
+                  <Badge className="bg-amber-600 text-white font-bold border-0 text-[10px]">
+                    {text.originalLanguage}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-600 dark:text-amber-300 font-bold">
+                    <Sparkles className="w-3 h-3 mr-1 text-amber-500" /> API Sourced
+                  </Badge>
+                </div>
                 <h3 className="font-serif font-bold text-lg text-foreground leading-snug">{text.title}</h3>
                 <p className="text-xs text-muted-foreground"><strong>Edition:</strong> {text.edition}</p>
                 <p className="text-xs text-muted-foreground"><strong>Rights:</strong> {text.rights}</p>
@@ -126,6 +162,26 @@ export default async function TraditionDetailPage({
               <Link href={`/read/${text.slug}`}>
                 <Button className="w-full rounded-full text-xs font-bold gap-1.5 bg-amber-700 hover:bg-amber-800 text-white shadow-md">
                   <BookOpen className="w-3.5 h-3.5" /> Read Sacred Text
+                </Button>
+              </Link>
+            </Card>
+          ))}
+
+          {/* Database Sourced Books under this Tradition */}
+          {dbBooks.map((book) => (
+            <Card key={book.id} className="rounded-3xl border shadow-md p-6 flex flex-col justify-between space-y-4 hover:border-amber-500/50 transition-all bg-card">
+              <div className="space-y-2.5">
+                <Badge variant="secondary" className="font-bold border-0 text-[10px]">
+                  {book.genre || detail.name}
+                </Badge>
+                <h3 className="font-serif font-bold text-lg text-foreground leading-snug">{book.title}</h3>
+                <p className="text-xs text-muted-foreground"><strong>Author:</strong> {book.authors?.name || "Traditional"}</p>
+                <p className="text-xs text-muted-foreground"><strong>Rights:</strong> Public Domain</p>
+              </div>
+
+              <Link href={`/books/${book.slug}`}>
+                <Button className="w-full rounded-full text-xs font-bold gap-1.5 bg-amber-700 hover:bg-amber-800 text-white shadow-md">
+                  <BookOpen className="w-3.5 h-3.5" /> View Volume Details
                 </Button>
               </Link>
             </Card>

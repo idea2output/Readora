@@ -271,28 +271,6 @@ export function FullHeroCarousel({ totalBooksCount }: FullHeroCarouselProps) {
         <ChevronRight className="w-6 h-6" />
       </button>
 
-      {/* Bottom 4-Page Navigation Bar (Left Aligned Tabs) */}
-      <div className="w-full py-4 bg-background/90 backdrop-blur border-t z-20 flex items-center justify-center gap-3">
-        {[
-          { label: "1. Humanity's Knowledge", subtitle: "Freely Accessible" },
-          { label: "2. Literary Harbor", subtitle: "Rights-Aware Library" },
-          { label: "3. Sacred Texts", subtitle: "0 AI Firewall" },
-          { label: "4. Academic Books", subtitle: "DOAB & OAPEN" }
-        ].map((tab, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentSlide(idx)}
-            className={`px-4 py-2 rounded-2xl transition-all text-xs font-bold flex flex-col items-center border ${
-              currentSlide === idx 
-                ? "bg-primary text-primary-foreground border-primary shadow-md scale-105" 
-                : "bg-muted/40 text-muted-foreground border-transparent hover:bg-muted hover:text-foreground"
-            }`}
-          >
-            <span>{tab.label}</span>
-            <span className="text-[10px] opacity-80 font-normal hidden sm:inline">{tab.subtitle}</span>
-          </button>
-        ))}
-      </div>
     </section>
   );
 }

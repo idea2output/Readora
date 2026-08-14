@@ -12,6 +12,7 @@ import {
   User,
   LogOut,
   BookMarked,
+  HeartHandshake,
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -161,6 +162,14 @@ export function Header() {
           >
             <ShieldCheck className="w-3.5 h-3.5 text-green-600" />
             Rights & Policy
+          </Link>
+
+          <Link
+            href="/contributors"
+            className="transition-colors hover:text-primary text-foreground/70 flex items-center gap-1 text-purple-600 dark:text-purple-400"
+          >
+            <HeartHandshake className="w-3.5 h-3.5" />
+            Contributors
           </Link>
 
         </nav>

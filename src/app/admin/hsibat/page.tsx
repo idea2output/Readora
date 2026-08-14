@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { QuranFoundationAdmin } from "@/components/admin/quran-foundation-admin";
 
 interface GutendexBook {
   id: number;
@@ -482,9 +483,12 @@ export default function AdminHsibatPage() {
 
       {/* Navigation Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 rounded-full bg-muted p-1 gap-1">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-7 rounded-full bg-muted p-1 gap-1">
           <TabsTrigger value="books" className="rounded-full text-xs font-bold gap-1.5">
             <BookOpen className="w-3.5 h-3.5" /> Ingestion & Books
+          </TabsTrigger>
+          <TabsTrigger value="quran" className="rounded-full text-xs font-bold gap-1.5 text-amber-600 dark:text-amber-400">
+            <Sparkles className="w-3.5 h-3.5" /> Quran Foundation
           </TabsTrigger>
           <TabsTrigger value="rights_cases" className="rounded-full text-xs font-bold gap-1.5 text-amber-600 dark:text-amber-400">
             <ShieldAlert className="w-3.5 h-3.5" /> Takedowns & Cases
@@ -502,6 +506,11 @@ export default function AdminHsibatPage() {
             <Settings2 className="w-3.5 h-3.5" /> AI & Settings
           </TabsTrigger>
         </TabsList>
+
+        {/* TAB: QURAN FOUNDATION CONTENT MANAGEMENT */}
+        <TabsContent value="quran">
+          <QuranFoundationAdmin />
+        </TabsContent>
 
         {/* TAB 1: INGESTION & BOOK ADMINISTRATION */}
         <TabsContent value="books" className="space-y-8">

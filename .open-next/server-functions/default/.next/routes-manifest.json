@@ -101,6 +101,12 @@
       "namedRegex": "^/admin/hsibat(?:/)?$"
     },
     {
+      "page": "/admin/quran",
+      "regex": "^/admin/quran(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/quran(?:/)?$"
+    },
+    {
       "page": "/api/admin/audit",
       "regex": "^/api/admin/audit(?:/)?$",
       "routeKeys": {},
@@ -135,6 +141,12 @@
       "regex": "^/api/admin/books/sync(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/admin/books/sync(?:/)?$"
+    },
+    {
+      "page": "/api/admin/quran/resources",
+      "regex": "^/api/admin/quran/resources(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/quran/resources(?:/)?$"
     },
     {
       "page": "/api/admin/settings",
@@ -213,6 +225,12 @@
       "regex": "^/collections(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/collections(?:/)?$"
+    },
+    {
+      "page": "/contributors",
+      "regex": "^/contributors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/contributors(?:/)?$"
     },
     {
       "page": "/favicon.ico",
