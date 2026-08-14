@@ -16,6 +16,7 @@
   "/api/ai/summary/route": "/api/ai/summary",
   "/api/books/request/route": "/api/books/request",
   "/api/geo/check/route": "/api/geo/check",
+  "/api/quran/route": "/api/quran",
   "/api/rights/report/route": "/api/rights/report",
   "/api/stripe/checkout/route": "/api/stripe/checkout",
   "/api/stripe/webhook/route": "/api/stripe/webhook",

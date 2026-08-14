@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   getQuranResources,
   toggleQuranResourceVisibility,
+  setDefaultQuranResource,
   refreshQuranFoundationResources,
   getQuranFoundationServerCredentials,
 } from "@/lib/quran/quran-foundation-server";
@@ -32,6 +33,15 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: result.error }, { status: 400 });
       }
       return NextResponse.json({ success: true, resource: result.resource });
+    }
+
+    if (action === "set_default") {
+      const result = await setDefaultQuranResource(resourceId, adminId || "admin");
+      if (!result.success) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
+      const updated = await getQuranResources();
+      return NextResponse.json({ success: true, resources: updated });
     }
 
     if (action === "refresh") {

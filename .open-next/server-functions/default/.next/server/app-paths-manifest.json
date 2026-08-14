@@ -16,6 +16,7 @@
   "/api/ai/summary/route": "app/api/ai/summary/route.js",
   "/api/books/request/route": "app/api/books/request/route.js",
   "/api/geo/check/route": "app/api/geo/check/route.js",
+  "/api/quran/route": "app/api/quran/route.js",
   "/api/rights/report/route": "app/api/rights/report/route.js",
   "/api/stripe/checkout/route": "app/api/stripe/checkout/route.js",
   "/api/stripe/webhook/route": "app/api/stripe/webhook/route.js",

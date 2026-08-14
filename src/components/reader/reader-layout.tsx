@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Menu, Settings, Bookmark, ChevronLeft, ChevronRight, Check, ShieldCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Menu, Settings, Bookmark, ChevronLeft, ChevronRight, Check, ShieldCheck, Languages, BookOpenText } from 'lucide-react';
 import Link from 'next/link';
 import {
   Sheet,
@@ -11,21 +12,32 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
+
 import { AiPanel } from '@/components/reader/ai-panel';
 import { PassageExplainer } from '@/components/reader/passage-explainer';
+import { QuranAudioPlayer } from '@/components/quran/quran-audio-player';
 
 interface ReaderLayoutProps {
   book: any;
   chapters: any[];
+  visibleTranslations?: any[];
+  visibleReciters?: any[];
+  visibleTafsirs?: any[];
 }
 
-export default function ReaderLayout({ book, chapters }: ReaderLayoutProps) {
+export default function ReaderLayout({
+  book,
+  chapters,
+  visibleTranslations = [],
+  visibleReciters = [],
+  visibleTafsirs = [],
+}: ReaderLayoutProps) {
   const { theme, setTheme } = useTheme();
   
   // Reader Settings State
@@ -36,7 +48,19 @@ export default function ReaderLayout({ book, chapters }: ReaderLayoutProps) {
   const [maxWidth, setMaxWidth] = useState('max-w-3xl');
   const [isNavVisible, setIsNavVisible] = useState(true);
 
+  // Quran Dynamic Selection State
+  const [selectedTranslation, setSelectedTranslation] = useState<any>(
+    visibleTranslations.find((t) => t.is_default) || visibleTranslations[0] || null
+  );
+  const [selectedTafsir, setSelectedTafsir] = useState<any>(
+    visibleTafsirs.find((t) => t.is_default) || visibleTafsirs[0] || null
+  );
+  const [activeVerseKey, setActiveVerseKey] = useState<string | null>(null);
+
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const currentChapter = chapters[currentChapterIdx] || chapters[0];
+  const isQuran = book?.slug === 'holy-quran-arabic';
 
   // Load progress from localStorage on mount
   useEffect(() => {
@@ -49,17 +73,36 @@ export default function ReaderLayout({ book, chapters }: ReaderLayoutProps) {
     }
   }, [book.id, chapters.length]);
 
+  // Highlight Active Verse in DOM
+  useEffect(() => {
+    if (!activeVerseKey) {
+      document.querySelectorAll(".quran-active-verse").forEach((el) => {
+        el.classList.remove("quran-active-verse", "bg-amber-500/20", "ring-2", "ring-amber-500");
+      });
+      return;
+    }
+
+    const verseId = `verse-${activeVerseKey.replace(':', '-')}`;
+    document.querySelectorAll(".quran-active-verse").forEach((el) => {
+      if (el.id !== verseId) {
+        el.classList.remove("quran-active-verse", "bg-amber-500/20", "ring-2", "ring-amber-500");
+      }
+    });
+
+    const activeElem = document.getElementById(verseId);
+    if (activeElem) {
+      activeElem.classList.add("quran-active-verse", "bg-amber-500/20", "ring-2", "ring-amber-500");
+    }
+  }, [activeVerseKey]);
+
   // Save progress when chapter changes
   useEffect(() => {
     localStorage.setItem(`readora_progress_${book.id}`, JSON.stringify({
       chapterIdx: currentChapterIdx,
       timestamp: Date.now()
     }));
-    // Scroll to top when changing chapters
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentChapterIdx, book.id]);
-
-  const currentChapter = chapters[currentChapterIdx];
 
   // Auto-hide nav on scroll down, show on scroll up
   useEffect(() => {
@@ -104,6 +147,46 @@ export default function ReaderLayout({ book, chapters }: ReaderLayoutProps) {
             </div>
 
             <div className="flex items-center gap-1 md:gap-2">
+              {/* Quran Reciter Audio Controls */}
+              {isQuran && visibleReciters.length > 0 && (
+                <QuranAudioPlayer
+                  chapterNumber={currentChapter.sequence_number || currentChapterIdx + 1}
+                  chapterName={currentChapter.name_simple || `Surah ${currentChapter.sequence_number}`}
+                  totalVerses={currentChapter.verses_count || 7}
+                  visibleReciters={visibleReciters}
+                  onActiveVerseChange={setActiveVerseKey}
+                />
+              )}
+
+              {/* Quran Translation Selector */}
+              {isQuran && visibleTranslations.length > 0 && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs border-amber-500/40 text-amber-900 dark:text-amber-300">
+                      <Languages className="w-3.5 h-3.5 text-amber-500" />
+                      <span className="hidden sm:inline">{selectedTranslation?.name || "Translations"}</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-3 space-y-2 rounded-2xl">
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Visible Translations</h4>
+                    <div className="space-y-1">
+                      {visibleTranslations.map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => setSelectedTranslation(t)}
+                          className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-colors ${
+                            selectedTranslation?.id === t.id ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold" : "hover:bg-accent"
+                          }`}
+                        >
+                          <span className="truncate">{t.name}</span>
+                          <Badge variant="outline" className="text-[9px] uppercase">{t.language_code}</Badge>
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+
               {/* Table of Contents */}
               <Sheet>
                 <SheetTrigger asChild>
@@ -129,7 +212,7 @@ export default function ReaderLayout({ book, chapters }: ReaderLayoutProps) {
                 </SheetContent>
               </Sheet>
 
-              {/* Settings */}
+              {/* Reader Settings */}
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full" aria-label="Reader Settings">
@@ -210,8 +293,8 @@ export default function ReaderLayout({ book, chapters }: ReaderLayoutProps) {
         </div>
       </main>
 
-      {/* AI Assistant Floating Panel or Sacred Text AI Firewall Badge */}
-      {book?.content_domain === 'SACRED_TEXT' || book?.ai_enabled === false ? (
+      {/* Sacred Text AI Firewall Badge */}
+      {book?.content_domain === 'SACRED_TEXT' || book?.ai_enabled === false || isQuran ? (
         <div className="fixed bottom-6 right-6 z-40 bg-amber-950/90 text-amber-200 border border-amber-500/40 text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 backdrop-blur">
           <ShieldCheck className="w-4 h-4 text-amber-400" />
           <span>Sacred Text — Permanent AI Firewall Active</span>
@@ -239,7 +322,10 @@ export default function ReaderLayout({ book, chapters }: ReaderLayoutProps) {
         .reader-content h2, .reader-content h3 {
           margin-top: 2em;
           margin-bottom: 1em;
-          font-weight: bold;
+        }
+        .quran-active-verse {
+          transition: all 0.3s ease;
+          border-radius: 0.75rem;
         }
       `}} />
     </div>

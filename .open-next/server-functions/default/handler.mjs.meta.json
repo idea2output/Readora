@@ -3869,12 +3869,12 @@
       "imports": [],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/app/api/admin/books/import/route_client-reference-manifest.js": {
+    ".open-next/server-functions/default/.next/server/app/api/admin/books/search/route_client-reference-manifest.js": {
       "bytes": 357,
       "imports": [],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/app/api/admin/books/search/route_client-reference-manifest.js": {
+    ".open-next/server-functions/default/.next/server/app/api/admin/books/import/route_client-reference-manifest.js": {
       "bytes": 357,
       "imports": [],
       "format": "cjs"
@@ -3949,8 +3949,13 @@
       "imports": [],
       "format": "cjs"
     },
+    ".open-next/server-functions/default/.next/server/app/api/quran/route_client-reference-manifest.js": {
+      "bytes": 329,
+      "imports": [],
+      "format": "cjs"
+    },
     ".open-next/server-functions/default/node_modules/next/dist/server/load-manifest.external.js": {
-      "bytes": 211251,
+      "bytes": 213160,
       "imports": [
         {
           "path": "path",
@@ -3983,14 +3988,14 @@
           "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\admin\\books\\status\\route_client-reference-manifest.js"
         },
         {
-          "path": ".open-next/server-functions/default/.next/server/app/api/admin/books/import/route_client-reference-manifest.js",
-          "kind": "require-call",
-          "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\admin\\books\\import\\route_client-reference-manifest.js"
-        },
-        {
           "path": ".open-next/server-functions/default/.next/server/app/api/admin/books/search/route_client-reference-manifest.js",
           "kind": "require-call",
           "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\admin\\books\\search\\route_client-reference-manifest.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/api/admin/books/import/route_client-reference-manifest.js",
+          "kind": "require-call",
+          "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\admin\\books\\import\\route_client-reference-manifest.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/api/admin/books/sync/route_client-reference-manifest.js",
@@ -4061,6 +4066,11 @@
           "path": ".open-next/server-functions/default/.next/server/app/api/ai/ask/route_client-reference-manifest.js",
           "kind": "require-call",
           "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\ai\\ask\\route_client-reference-manifest.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/api/quran/route_client-reference-manifest.js",
+          "kind": "require-call",
+          "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\quran\\route_client-reference-manifest.js"
         }
       ],
       "format": "cjs"
@@ -4681,11 +4691,6 @@
       "imports": [],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/chunks/2177.js": {
-      "bytes": 27505,
-      "imports": [],
-      "format": "cjs"
-    },
     ".open-next/server-functions/default/.next/server/chunks/2309.js": {
       "bytes": 18595,
       "imports": [],
@@ -4742,6 +4747,11 @@
       "imports": [],
       "format": "cjs"
     },
+    ".open-next/server-functions/default/.next/server/chunks/6007.js": {
+      "bytes": 26662,
+      "imports": [],
+      "format": "cjs"
+    },
     ".open-next/server-functions/default/.next/server/chunks/6949.js": {
       "bytes": 20981,
       "imports": [],
@@ -4769,11 +4779,6 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/1813.js",
           "kind": "require-call",
           "original": "./chunks/1813.js"
-        },
-        {
-          "path": ".open-next/server-functions/default/.next/server/chunks/2177.js",
-          "kind": "require-call",
-          "original": "./chunks/2177.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/2309.js",
@@ -4811,6 +4816,11 @@
           "original": "./chunks/5199.js"
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/chunks/6007.js",
+          "kind": "require-call",
+          "original": "./chunks/6007.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/chunks/6949.js",
           "kind": "require-call",
           "original": "./chunks/6949.js"
@@ -4829,7 +4839,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/app/api/admin/quran/resources/route.js": {
-      "bytes": 16756,
+      "bytes": 17544,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/router/utils/app-paths.js",
@@ -5287,7 +5297,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/app/sacred-texts/compare/page.js": {
-      "bytes": 11113,
+      "bytes": 11115,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/server/app-render/after-task-async-storage.external.js",
@@ -5811,7 +5821,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/app/api/ai/explain/route.js": {
-      "bytes": 14971,
+      "bytes": 14973,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/router/utils/app-paths.js",
@@ -5979,7 +5989,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/app/authors/[slug]/page.js": {
-      "bytes": 14677,
+      "bytes": 14679,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/server/app-render/after-task-async-storage.external.js",
@@ -6045,7 +6055,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/app/reset-password/page.js": {
-      "bytes": 6221,
+      "bytes": 6219,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/server/app-render/after-task-async-storage.external.js",
@@ -6177,7 +6187,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/app/favicon.ico/route.js": {
-      "bytes": 42367,
+      "bytes": 42369,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/router/utils/app-paths.js",
@@ -6619,7 +6629,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/app/admin/quran/page.js": {
-      "bytes": 5709,
+      "bytes": 5707,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/server/app-render/after-task-async-storage.external.js",
@@ -6751,7 +6761,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/app/read/[slug]/page.js": {
-      "bytes": 131221,
+      "bytes": 143952,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/server/app-render/after-task-async-storage.external.js",
@@ -6817,7 +6827,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/app/_not-found/page.js": {
-      "bytes": 2278,
+      "bytes": 2280,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/server/app-render/after-task-async-storage.external.js",
@@ -6878,6 +6888,62 @@
           "path": ".open-next/server-functions/default/.next/server/webpack-runtime.js",
           "kind": "require-call",
           "original": "../../webpack-runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/api/quran/route.js": {
+      "bytes": 18332,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/router/utils/app-paths.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/router/utils/app-paths"
+        },
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/server/app-render/after-task-async-storage.external.js",
+          "kind": "require-call",
+          "original": "next/dist/server/app-render/after-task-async-storage.external.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/server/runtime-reacts.external.js",
+          "kind": "require-call",
+          "original": "next/dist/server/runtime-reacts.external.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js",
+          "kind": "require-call",
+          "original": "next/dist/compiled/next-server/app-page.runtime.prod.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/server/app-render/action-async-storage.external.js",
+          "kind": "require-call",
+          "original": "next/dist/server/app-render/action-async-storage.external.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/server/app-render/work-async-storage.external.js",
+          "kind": "require-call",
+          "original": "next/dist/server/app-render/work-async-storage.external.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js",
+          "kind": "require-call",
+          "original": "next/dist/compiled/next-server/app-route.runtime.prod.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js",
+          "kind": "require-call",
+          "original": "next/dist/server/app-render/work-unit-async-storage.external.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/webpack-runtime.js",
+          "kind": "require-call",
+          "original": "../../../webpack-runtime.js"
         }
       ],
       "format": "cjs"
@@ -7629,7 +7695,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/node_modules/next/dist/server/require.js": {
-      "bytes": 13917,
+      "bytes": 14126,
       "imports": [
         {
           "path": "path",
@@ -7845,6 +7911,11 @@
           "path": ".open-next/server-functions/default/.next/server/app/_not-found/page.js",
           "kind": "require-call",
           "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\_not-found\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/api/quran/route.js",
+          "kind": "require-call",
+          "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\quran\\route.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/academic/page.js",
@@ -9145,7 +9216,7 @@
       "format": "esm"
     },
     ".open-next/server-functions/default/index.mjs": {
-      "bytes": 97637,
+      "bytes": 97781,
       "imports": [
         {
           "path": "node:module",
@@ -10927,10 +10998,10 @@
         ".open-next/server-functions/default/.next/server/app/api/admin/books/status/route_client-reference-manifest.js": {
           "bytesInOutput": 527
         },
-        ".open-next/server-functions/default/.next/server/app/api/admin/books/import/route_client-reference-manifest.js": {
+        ".open-next/server-functions/default/.next/server/app/api/admin/books/search/route_client-reference-manifest.js": {
           "bytesInOutput": 527
         },
-        ".open-next/server-functions/default/.next/server/app/api/admin/books/search/route_client-reference-manifest.js": {
+        ".open-next/server-functions/default/.next/server/app/api/admin/books/import/route_client-reference-manifest.js": {
           "bytesInOutput": 527
         },
         ".open-next/server-functions/default/.next/server/app/api/admin/books/sync/route_client-reference-manifest.js": {
@@ -10975,8 +11046,11 @@
         ".open-next/server-functions/default/.next/server/app/api/ai/ask/route_client-reference-manifest.js": {
           "bytesInOutput": 491
         },
+        ".open-next/server-functions/default/.next/server/app/api/quran/route_client-reference-manifest.js": {
+          "bytesInOutput": 487
+        },
         ".open-next/server-functions/default/node_modules/next/dist/server/load-manifest.external.js": {
-          "bytesInOutput": 178558
+          "bytesInOutput": 180100
         },
         ".open-next/server-functions/default/node_modules/next/dist/lib/interop-default.js": {
           "bytesInOutput": 363
@@ -11053,9 +11127,6 @@
         ".open-next/server-functions/default/.next/server/chunks/1813.js": {
           "bytesInOutput": 27653
         },
-        ".open-next/server-functions/default/.next/server/chunks/2177.js": {
-          "bytesInOutput": 28128
-        },
         ".open-next/server-functions/default/.next/server/chunks/2309.js": {
           "bytesInOutput": 18820
         },
@@ -11075,7 +11146,10 @@
           "bytesInOutput": 290181
         },
         ".open-next/server-functions/default/.next/server/chunks/5199.js": {
-          "bytesInOutput": 12707
+          "bytesInOutput": 12706
+        },
+        ".open-next/server-functions/default/.next/server/chunks/6007.js": {
+          "bytesInOutput": 27219
         },
         ".open-next/server-functions/default/.next/server/chunks/6949.js": {
           "bytesInOutput": 21450
@@ -11090,7 +11164,7 @@
           "bytesInOutput": 2171
         },
         ".open-next/server-functions/default/.next/server/app/api/admin/quran/resources/route.js": {
-          "bytesInOutput": 16989
+          "bytesInOutput": 17729
         },
         ".open-next/server-functions/default/.next/server/app/sacred-texts/[tradition]/page.js": {
           "bytesInOutput": 25458
@@ -11114,7 +11188,7 @@
           "bytesInOutput": 11440
         },
         ".open-next/server-functions/default/.next/server/app/sacred-texts/compare/page.js": {
-          "bytesInOutput": 11768
+          "bytesInOutput": 11770
         },
         ".open-next/server-functions/default/.next/server/app/api/admin/settings/route.js": {
           "bytesInOutput": 10852
@@ -11141,7 +11215,7 @@
           "bytesInOutput": 10297
         },
         ".open-next/server-functions/default/.next/server/app/api/ai/explain/route.js": {
-          "bytesInOutput": 15163
+          "bytesInOutput": 15165
         },
         ".open-next/server-functions/default/.next/server/app/api/ai/summary/route.js": {
           "bytesInOutput": 16270
@@ -11150,16 +11224,16 @@
           "bytesInOutput": 9229
         },
         ".open-next/server-functions/default/.next/server/app/authors/[slug]/page.js": {
-          "bytesInOutput": 14978
+          "bytesInOutput": 14980
         },
         ".open-next/server-functions/default/.next/server/app/reset-password/page.js": {
-          "bytesInOutput": 6236
+          "bytesInOutput": 6234
         },
         ".open-next/server-functions/default/.next/server/app/_global-error/page.js": {
           "bytesInOutput": 8082
         },
         ".open-next/server-functions/default/.next/server/app/favicon.ico/route.js": {
-          "bytesInOutput": 42380
+          "bytesInOutput": 42382
         },
         ".open-next/server-functions/default/.next/server/app/admin/hsibat/page.js": {
           "bytesInOutput": 45138
@@ -11180,16 +11254,19 @@
           "bytesInOutput": 18864
         },
         ".open-next/server-functions/default/.next/server/app/admin/quran/page.js": {
-          "bytesInOutput": 5705
+          "bytesInOutput": 5703
         },
         ".open-next/server-functions/default/.next/server/app/collections/page.js": {
           "bytesInOutput": 20307
         },
         ".open-next/server-functions/default/.next/server/app/read/[slug]/page.js": {
-          "bytesInOutput": 142402
+          "bytesInOutput": 155394
         },
         ".open-next/server-functions/default/.next/server/app/_not-found/page.js": {
-          "bytesInOutput": 2210
+          "bytesInOutput": 2212
+        },
+        ".open-next/server-functions/default/.next/server/app/api/quran/route.js": {
+          "bytesInOutput": 18559
         },
         ".open-next/server-functions/default/.next/server/app/academic/page.js": {
           "bytesInOutput": 15999
@@ -11225,7 +11302,7 @@
           "bytesInOutput": 37067
         },
         ".open-next/server-functions/default/node_modules/next/dist/server/require.js": {
-          "bytesInOutput": 7092
+          "bytesInOutput": 7185
         },
         ".open-next/server-functions/default/node_modules/next/dist/lib/wait.js": {
           "bytesInOutput": 341
@@ -11378,10 +11455,10 @@
           "bytesInOutput": 633
         },
         ".open-next/server-functions/default/index.mjs": {
-          "bytesInOutput": 69655
+          "bytesInOutput": 69779
         }
       },
-      "bytes": 5181056
+      "bytes": 5214689
     }
   }
 }

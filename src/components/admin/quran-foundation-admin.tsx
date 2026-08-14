@@ -26,6 +26,9 @@ import {
   X,
   Play,
   Pause,
+  Star,
+  Radio,
+  Music,
 } from "lucide-react";
 import { QuranResource, DEFAULT_QF_RESOURCES } from "@/lib/quran/quran-foundation-server";
 
@@ -34,9 +37,10 @@ export function QuranFoundationAdmin() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("translations");
+  const [activeTab, setActiveTab] = useState("reciters");
   const [previewResource, setPreviewResource] = useState<QuranResource | null>(null);
   const [playingAudio, setPlayingAudio] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [auditLogs, setAuditLogs] = useState<any[]>([
     { id: "log-1", admin_id: "admin-master", action: "MARK_VISIBLE", resource_name: "Clear Quran (Dr. Mustafa Khattab)", timestamp: new Date(Date.now() - 3600000).toLocaleString() },
     { id: "log-2", admin_id: "admin-master", action: "MARK_VISIBLE", resource_name: "Mishari Rashid al-`Afasy (Reciter)", timestamp: new Date(Date.now() - 7200000).toLocaleString() },
@@ -94,6 +98,26 @@ export function QuranFoundationAdmin() {
     } catch (_) {}
   };
 
+  const handleSetDefault = async (resourceId: string) => {
+    setResources((prev) =>
+      prev.map((r) => ({
+        ...r,
+        is_default: r.id === resourceId,
+      }))
+    );
+
+    try {
+      await fetch("/api/admin/quran/resources", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "set_default",
+          resourceId,
+        }),
+      });
+    } catch (_) {}
+  };
+
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -110,6 +134,22 @@ export function QuranFoundationAdmin() {
       }
     } catch (_) {}
     setRefreshing(false);
+  };
+
+  const playPreviewAudio = (r: QuranResource) => {
+    if (playingAudio && audioElement) {
+      audioElement.pause();
+      setPlayingAudio(false);
+      return;
+    }
+
+    const audioUrl = `https://verses.quran.com/Alafasy/mp3/001001.mp3`;
+    const audio = new Audio(audioUrl);
+    setAudioElement(audio);
+    setPlayingAudio(true);
+
+    audio.play().catch(() => setPlayingAudio(false));
+    audio.onended = () => setPlayingAudio(false);
   };
 
   const filteredResources = (type: string) => {
@@ -157,7 +197,7 @@ export function QuranFoundationAdmin() {
             className="rounded-full text-xs font-bold gap-1.5 border-amber-500/40 text-amber-200 hover:bg-amber-500/20"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-            Refresh from Quran Foundation
+            Sync Quran Foundation Resources
           </Button>
         </div>
       </div>
@@ -188,14 +228,14 @@ export function QuranFoundationAdmin() {
       {/* 6 Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid grid-cols-3 md:grid-cols-6 rounded-2xl p-1 bg-muted">
+          <TabsTrigger value="reciters" className="text-xs font-bold rounded-xl gap-1">
+            <Volume2 className="w-3.5 h-3.5" /> Audio & Reciters
+          </TabsTrigger>
           <TabsTrigger value="translations" className="text-xs font-bold rounded-xl gap-1">
             <BookOpen className="w-3.5 h-3.5" /> Translations
           </TabsTrigger>
           <TabsTrigger value="tafsirs" className="text-xs font-bold rounded-xl gap-1">
             <FileText className="w-3.5 h-3.5" /> Tafsirs
-          </TabsTrigger>
-          <TabsTrigger value="reciters" className="text-xs font-bold rounded-xl gap-1">
-            <Volume2 className="w-3.5 h-3.5" /> Reciters
           </TabsTrigger>
           <TabsTrigger value="languages" className="text-xs font-bold rounded-xl gap-1">
             <Globe className="w-3.5 h-3.5" /> Languages
@@ -208,29 +248,32 @@ export function QuranFoundationAdmin() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Tab 1: Translations */}
-        <TabsContent value="translations">
-          <ResourceGrid
-            items={filteredResources("translation")}
-            onToggleVisibility={handleToggleVisibility}
-            onPreview={setPreviewResource}
-          />
-        </TabsContent>
-
-        {/* Tab 2: Tafsirs */}
-        <TabsContent value="tafsirs">
-          <ResourceGrid
-            items={filteredResources("tafsir")}
-            onToggleVisibility={handleToggleVisibility}
-            onPreview={setPreviewResource}
-          />
-        </TabsContent>
-
-        {/* Tab 3: Reciters */}
+        {/* Tab 1: Audio & Reciters */}
         <TabsContent value="reciters">
           <ResourceGrid
             items={filteredResources("reciter")}
             onToggleVisibility={handleToggleVisibility}
+            onSetDefault={handleSetDefault}
+            onPreview={setPreviewResource}
+          />
+        </TabsContent>
+
+        {/* Tab 2: Translations */}
+        <TabsContent value="translations">
+          <ResourceGrid
+            items={filteredResources("translation")}
+            onToggleVisibility={handleToggleVisibility}
+            onSetDefault={handleSetDefault}
+            onPreview={setPreviewResource}
+          />
+        </TabsContent>
+
+        {/* Tab 3: Tafsirs */}
+        <TabsContent value="tafsirs">
+          <ResourceGrid
+            items={filteredResources("tafsir")}
+            onToggleVisibility={handleToggleVisibility}
+            onSetDefault={handleSetDefault}
             onPreview={setPreviewResource}
           />
         </TabsContent>
@@ -240,6 +283,7 @@ export function QuranFoundationAdmin() {
           <ResourceGrid
             items={filteredResources("language")}
             onToggleVisibility={handleToggleVisibility}
+            onSetDefault={handleSetDefault}
             onPreview={setPreviewResource}
           />
         </TabsContent>
@@ -249,6 +293,7 @@ export function QuranFoundationAdmin() {
           <ResourceGrid
             items={filteredResources("chapter_info")}
             onToggleVisibility={handleToggleVisibility}
+            onSetDefault={handleSetDefault}
             onPreview={setPreviewResource}
           />
         </TabsContent>
@@ -258,65 +303,42 @@ export function QuranFoundationAdmin() {
           <Card className="rounded-3xl border shadow-sm p-6 space-y-4 bg-card">
             <CardHeader className="p-0 space-y-1">
               <CardTitle className="font-serif text-xl font-bold flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                Global Public Visibility & Governance
+                <ShieldCheck className="w-5 h-5 text-amber-500" /> Administrative Access & Audit Trail
               </CardTitle>
               <CardDescription className="text-xs">
-                By default, newly fetched Quran Foundation resources remain strictly hidden until an authorized administrator marks them visible.
+                Every visibility change or resource refresh from Quran Foundation is logged securely.
               </CardDescription>
             </CardHeader>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="p-4 rounded-2xl bg-muted/40 border space-y-1">
-                <p className="text-xs text-muted-foreground font-bold">Total Imported Resources</p>
-                <p className="font-mono text-2xl font-bold">{resources.length}</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Publicly Visible</p>
-                <p className="font-mono text-2xl font-bold text-emerald-600 dark:text-emerald-400">{visibleCount}</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-1">
-                <p className="text-xs text-amber-600 dark:text-amber-400 font-bold">Hidden / Awaiting Review</p>
-                <p className="font-mono text-2xl font-bold text-amber-600 dark:text-amber-400">{hiddenCount}</p>
-              </div>
-            </div>
-
-            <div className="space-y-3 pt-4 border-t">
-              <h3 className="font-bold text-sm flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary" /> Admin Visibility Audit Trail
-              </h3>
-              <div className="space-y-2">
-                {auditLogs.map((log) => (
-                  <div key={log.id} className="p-3 rounded-xl bg-muted/30 border text-xs flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-foreground">{log.action === "MARK_VISIBLE" ? "✅ Marked Visible: " : "🔒 Marked Hidden: "}</span>
-                      <span className="font-medium text-muted-foreground">{log.resource_name}</span>
-                    </div>
-                    <span className="text-[10px] font-mono text-muted-foreground">{log.timestamp}</span>
+            <div className="space-y-2 pt-4">
+              {auditLogs.map((log) => (
+                <div key={log.id} className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border text-xs">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="text-[10px] font-mono border-amber-500/30">
+                      {log.action}
+                    </Badge>
+                    <span className="font-bold">{log.resource_name}</span>
                   </div>
-                ))}
-              </div>
+                  <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-mono">
+                    <Clock className="w-3 h-3" /> {log.timestamp}
+                  </span>
+                </div>
+              ))}
             </div>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Preview Modal */}
+      {/* Preview Dialog */}
       {previewResource && (
         <Dialog open={Boolean(previewResource)} onOpenChange={() => setPreviewResource(null)}>
-          <DialogContent className="sm:max-w-xl rounded-3xl p-6 border shadow-2xl">
-            <DialogHeader className="space-y-2 text-left">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs">
-                  <Sparkles className="w-3.5 h-3.5 mr-1" /> Resource Preview
-                </Badge>
-                <Badge className="bg-amber-600 text-white text-xs">{previewResource.resource_type}</Badge>
-              </div>
-              <DialogTitle className="font-serif text-2xl font-bold">
-                {previewResource.name}
+          <DialogContent className="rounded-3xl max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-serif text-xl font-bold flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-500" /> Resource Preview
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                Author/Translator/Reciter: <strong>{previewResource.author_name}</strong> | Language: <strong>{previewResource.language_name}</strong> | Source: <strong>Quran Foundation</strong>
+              <DialogDescription className="text-xs">
+                {previewResource.name} ({previewResource.language_name})
               </DialogDescription>
             </DialogHeader>
 
@@ -338,7 +360,7 @@ export function QuranFoundationAdmin() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setPlayingAudio(!playingAudio)}
+                    onClick={() => playPreviewAudio(previewResource)}
                     className="rounded-full text-xs font-bold gap-1"
                   >
                     {playingAudio ? <Pause className="w-3.5 h-3.5 text-amber-500" /> : <Play className="w-3.5 h-3.5 text-amber-500" />}
@@ -357,10 +379,12 @@ export function QuranFoundationAdmin() {
 function ResourceGrid({
   items,
   onToggleVisibility,
+  onSetDefault,
   onPreview,
 }: {
   items: QuranResource[];
   onToggleVisibility: (id: string, isVisible: boolean) => void;
+  onSetDefault: (id: string) => void;
   onPreview: (resource: QuranResource) => void;
 }) {
   if (items.length === 0) {
@@ -392,9 +416,27 @@ function ResourceGrid({
             </div>
 
             <div>
-              <h4 className="font-serif font-bold text-base text-foreground line-clamp-1">{r.name}</h4>
+              <div className="flex items-center gap-1.5">
+                <h4 className="font-serif font-bold text-base text-foreground line-clamp-1">{r.name}</h4>
+                {r.is_default && (
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
+                )}
+              </div>
               <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{r.author_name}</p>
             </div>
+
+            {r.resource_type === "reciter" && (
+              <div className="flex items-center gap-2 pt-1">
+                <Badge variant="secondary" className="text-[9px] font-mono bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                  Mode: {r.audio_mode === "both" ? "Ayah & Full Surah" : r.audio_mode || "Ayah by Ayah"}
+                </Badge>
+                {r.style && (
+                  <Badge variant="outline" className="text-[9px] font-mono">
+                    Style: {r.style}
+                  </Badge>
+                )}
+              </div>
+            )}
 
             <div className="text-[11px] text-muted-foreground/80 space-y-0.5 border-t pt-2 font-mono">
               <p>Resource ID: <strong>{r.qf_id}</strong></p>
@@ -412,6 +454,18 @@ function ResourceGrid({
             >
               Preview
             </Button>
+
+            {!r.is_default && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onSetDefault(r.id)}
+                className="rounded-full text-[10px] font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+              >
+                Set Default
+              </Button>
+            )}
+
             <Button
               size="sm"
               variant={r.is_visible ? "secondary" : "default"}
@@ -423,7 +477,7 @@ function ResourceGrid({
               }`}
             >
               {r.is_visible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              {r.is_visible ? "Hide from Public" : "Make Public"}
+              {r.is_visible ? "Hide" : "Make Public"}
             </Button>
           </div>
         </Card>

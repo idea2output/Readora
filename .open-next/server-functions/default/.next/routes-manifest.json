@@ -197,6 +197,12 @@
       "namedRegex": "^/api/geo/check(?:/)?$"
     },
     {
+      "page": "/api/quran",
+      "regex": "^/api/quran(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/quran(?:/)?$"
+    },
+    {
       "page": "/api/rights/report",
       "regex": "^/api/rights/report(?:/)?$",
       "routeKeys": {},
