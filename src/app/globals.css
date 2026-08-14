@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+/* Official Quran Foundation QPC Hafs Font */
+@font-face {
+  font-family: "QPC Hafs";
+  src: url("https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2") format("woff2");
+  font-display: swap;
+}
+
+.quran-text {
+  font-family: "QPC Hafs", "Amiri Quran", "Noto Naskh Arabic", serif;
+  direction: rtl;
+  text-align: right;
+  line-height: 2.15;
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+}
+
+.notranslate {
+  translate: no;
+}
+
 @theme {
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -83,8 +102,8 @@
   }
 
   .sepia {
-    --background: 40 40% 96%; /* Cream/off-white */
-    --foreground: 30 20% 25%; /* Dark brown */
+    --background: 40 40% 96%;
+    --foreground: 30 20% 25%;
     --card: 40 30% 92%;
     --card-foreground: 30 20% 25%;
     --popover: 40 40% 96%;
@@ -116,24 +135,6 @@
     top: 0px !important;
     position: static !important;
   }
-  /* Official Quran Foundation QPC Hafs Font */
-  @font-face {
-    font-family: "QPC Hafs";
-    src: url("https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2") format("woff2");
-    font-display: swap;
-  }
-
-  .quran-text {
-    font-family: "QPC Hafs", "Amiri Quran", "Noto Naskh Arabic", serif;
-    direction: rtl;
-    text-align: right;
-    line-height: 2.15;
-    font-size: clamp(1.7rem, 3vw, 2.5rem);
-  }
-
-  .notranslate {
-    translate: no;
-  }
 }
 
 /* Hide Google Translate top banner bar & popups silently */
@@ -150,20 +151,17 @@ iframe.goog-te-banner-frame,
   opacity: 0 !important;
   height: 0 !important;
   width: 0 !important;
-  pointer-events: none !important;
 }
 
-/* Hide Google Translate gadgets & tooltips */
-.goog-te-gadget,
-.goog-te-gadget-simple,
-.goog-tooltip,
-.goog-tooltip:hover {
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+.goog-te-gadget {
+  font-size: 0 !important;
+}
+
+.goog-te-gadget span {
   display: none !important;
 }
-
-/* Remove yellow text highlights caused by Google Translate */
-.goog-text-highlight {
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-

@@ -3864,12 +3864,12 @@
       "imports": [],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/app/api/admin/books/status/route_client-reference-manifest.js": {
+    ".open-next/server-functions/default/.next/server/app/api/admin/books/search/route_client-reference-manifest.js": {
       "bytes": 357,
       "imports": [],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/app/api/admin/books/search/route_client-reference-manifest.js": {
+    ".open-next/server-functions/default/.next/server/app/api/admin/books/status/route_client-reference-manifest.js": {
       "bytes": 357,
       "imports": [],
       "format": "cjs"
@@ -3950,7 +3950,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/node_modules/next/dist/server/load-manifest.external.js": {
-      "bytes": 212787,
+      "bytes": 211251,
       "imports": [
         {
           "path": "path",
@@ -3978,14 +3978,14 @@
           "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\admin\\quran\\resources\\route_client-reference-manifest.js"
         },
         {
-          "path": ".open-next/server-functions/default/.next/server/app/api/admin/books/status/route_client-reference-manifest.js",
-          "kind": "require-call",
-          "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\admin\\books\\status\\route_client-reference-manifest.js"
-        },
-        {
           "path": ".open-next/server-functions/default/.next/server/app/api/admin/books/search/route_client-reference-manifest.js",
           "kind": "require-call",
           "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\admin\\books\\search\\route_client-reference-manifest.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/api/admin/books/status/route_client-reference-manifest.js",
+          "kind": "require-call",
+          "original": "D:\\AMJAD\\Library\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\admin\\books\\status\\route_client-reference-manifest.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/api/admin/books/import/route_client-reference-manifest.js",
@@ -10924,10 +10924,10 @@
         ".open-next/server-functions/default/.next/server/app/api/admin/quran/resources/route_client-reference-manifest.js": {
           "bytesInOutput": 535
         },
-        ".open-next/server-functions/default/.next/server/app/api/admin/books/status/route_client-reference-manifest.js": {
+        ".open-next/server-functions/default/.next/server/app/api/admin/books/search/route_client-reference-manifest.js": {
           "bytesInOutput": 527
         },
-        ".open-next/server-functions/default/.next/server/app/api/admin/books/search/route_client-reference-manifest.js": {
+        ".open-next/server-functions/default/.next/server/app/api/admin/books/status/route_client-reference-manifest.js": {
           "bytesInOutput": 527
         },
         ".open-next/server-functions/default/.next/server/app/api/admin/books/import/route_client-reference-manifest.js": {
@@ -10976,7 +10976,7 @@
           "bytesInOutput": 491
         },
         ".open-next/server-functions/default/node_modules/next/dist/server/load-manifest.external.js": {
-          "bytesInOutput": 179912
+          "bytesInOutput": 178558
         },
         ".open-next/server-functions/default/node_modules/next/dist/lib/interop-default.js": {
           "bytesInOutput": 363
@@ -11381,7 +11381,7 @@
           "bytesInOutput": 69655
         }
       },
-      "bytes": 5182410
+      "bytes": 5181056
     }
   }
 }
