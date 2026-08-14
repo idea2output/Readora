@@ -20,6 +20,10 @@ export default {
                 return response;
             }
             const url = new URL(request.url);
+            if (env && env.ASSETS && (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/favicon.ico"))) {
+                const assetResp = await env.ASSETS.fetch(request);
+                if (assetResp.status !== 404) return assetResp;
+            }
             // Serve images in development.
             // Note: "/cdn-cgi/image/..." requests do not reach production workers.
             if (url.pathname.startsWith("/cdn-cgi/image/")) {
