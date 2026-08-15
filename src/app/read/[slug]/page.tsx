@@ -1,5 +1,5 @@
 import { getBookBySlug } from '@/lib/db/books';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import ReaderLayout from '@/components/reader/reader-layout';
 import { getQuranFoundationSurahs, getQuranFoundationVerses } from '@/lib/quran/quran-foundation';
@@ -24,6 +24,16 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
   
   if (!book) {
     notFound();
+  }
+
+  // Provider-Aware Reading Behavior: OpenStax Link/Integrate Model
+  const rightsRecord = Array.isArray(book.book_rights) ? book.book_rights[0] : book.book_rights;
+  const sourceId = rightsRecord?.source_id || book.source_id;
+  const isOpenStax = sourceId === 'openstax' || book.publisher === 'OpenStax' || (book.source_url && book.source_url.includes('openstax.org'));
+
+  if (isOpenStax) {
+    const targetUrl = book.reader_url || book.source_url || `https://openstax.org/books/${book.slug}`;
+    redirect(targetUrl);
   }
 
   // Fetch chapters for this book from Supabase
@@ -89,14 +99,22 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
     }
   }
 
-  // General Fallback for other Sacred Texts
+  // General Fallback for non-OpenStax books when local chapter content is pending
   if (finalChapters.length === 0) {
+    const authorName = Array.isArray(book.authors) ? book.authors[0]?.name : book.authors?.name;
+    const authorDisplayName = authorName || 'Literary Harbour Open Library';
+    const isQuranText = book.slug?.includes('quran') || book.genre === 'Sacred Texts';
+
+    const provenanceText = isQuranText
+      ? `This authentic edition of <strong>${book.title}</strong> is provided directly by <strong>${authorDisplayName}</strong>. Hosted with 0 AI intervention under Literary Harbor Rights Governance.`
+      : `This open-access edition of <strong>${book.title}</strong> by <strong>${authorDisplayName}</strong> is cataloged under Literary Harbour Rights Governance.`;
+
     finalChapters = [
       {
         id: "default-ch-1",
         sequence_number: 1,
-        title: "Canonical Section 1",
-        content: `<p class="leading-relaxed text-center">This authentic edition of <strong>${book.title}</strong> is provided directly by <strong>${book.authors?.name || 'Quran Foundation (Quran.com)'}</strong> & King Fahd Quran Printing Complex. Hosted with 0 AI intervention under Literary Harbor Rights Governance.</p>`
+        title: "Overview",
+        content: `<p class="leading-relaxed text-center">${provenanceText}</p>`
       }
     ];
   }

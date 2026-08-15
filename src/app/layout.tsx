@@ -31,15 +31,15 @@ const merriweather = Merriweather({
 })
 
 export const metadata: Metadata = {
-  title: "Literary Harbor — Safe Harbor for the World's Literature",
-  description: "A global, rights-aware digital library providing lawful access to public-domain literature, open-access academic books, and open educational resources.",
+  title: "Literary Harbour — Global Open Digital Library",
+  description: "Knowledge Without Borders. A global digital library providing access to public-domain literature, open-access academic textbooks, and sacred manuscripts.",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://literaryharbor.org",
-    title: "Literary Harbor — Safe Harbor for the World's Literature",
-    description: "Discover, read, study, and request legally reusable literature and open academic knowledge.",
-    siteName: "Literary Harbor",
+    url: "https://literaryharbour.com",
+    title: "Literary Harbour — Global Open Digital Library",
+    description: "Knowledge Without Borders. Discover, read, study, and research legally reusable literature and open academic knowledge.",
+    siteName: "Literary Harbour",
   },
 }
 

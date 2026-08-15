@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { GraduationCap, Search, ShieldCheck, FileText, BookOpen, Layers, CheckCircle2 } from "lucide-react";
+import { GraduationCap, Search, ShieldCheck, FileText, BookOpen, Layers, CheckCircle2, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,9 @@ interface AcademicBook {
   institution?: string;
   year?: number;
   peerReviewed?: boolean;
+  provider?: string;
+  providerUrl?: string;
+  license?: string;
 }
 
 export default function AcademicLibraryPage() {
@@ -39,6 +42,54 @@ export default function AcademicLibraryPage() {
 
   const mockAcademicBooks: AcademicBook[] = [
     {
+      id: "ostax-101",
+      title: "College Physics 2e",
+      slug: "college-physics-2e",
+      cover_url: null,
+      genre: "Physics",
+      author: "Paul Peter Urone, Roger Hinrichs",
+      isbn: "978-1-951693-60-2",
+      publisher: "OpenStax",
+      institution: "Rice University",
+      year: 2022,
+      peerReviewed: true,
+      provider: "OpenStax",
+      providerUrl: "https://openstax.org/details/books/college-physics-2e",
+      license: "CC BY 4.0",
+    },
+    {
+      id: "ostax-102",
+      title: "Introductory Statistics 2e",
+      slug: "introductory-statistics-2e",
+      cover_url: null,
+      genre: "Statistics",
+      author: "Barbara Illowsky, Susan Dean",
+      isbn: "978-1-951693-85-5",
+      publisher: "OpenStax",
+      institution: "Rice University",
+      year: 2023,
+      peerReviewed: true,
+      provider: "OpenStax",
+      providerUrl: "https://openstax.org/details/books/introductory-statistics-2e",
+      license: "CC BY 4.0",
+    },
+    {
+      id: "ostax-103",
+      title: "Biology 2e",
+      slug: "biology-2e",
+      cover_url: null,
+      genre: "Biology",
+      author: "Mary Ann Clark, Matthew Douglas",
+      isbn: "978-1-947172-51-7",
+      publisher: "OpenStax",
+      institution: "Rice University",
+      year: 2021,
+      peerReviewed: true,
+      provider: "OpenStax",
+      providerUrl: "https://openstax.org/details/books/biology-2e",
+      license: "CC BY 4.0",
+    },
+    {
       id: "1",
       title: "Principles of Open Educational Economics",
       slug: "principles-open-educational-economics",
@@ -50,34 +101,6 @@ export default function AcademicLibraryPage() {
       publisher: "Oxford Open Press",
       institution: "University of Oxford",
       year: 2024,
-      peerReviewed: true,
-    },
-    {
-      id: "2",
-      title: "Ethics in Artificial Intelligence & Digital Governance",
-      slug: "ethics-artificial-intelligence-digital-governance",
-      cover_url: null,
-      genre: "Computer Science",
-      author: "Dr. Marcus Thorne",
-      doi: "10.1145/3313831.3376321",
-      isbn: "978-3-030-45678-9",
-      publisher: "MIT Open Publishing",
-      institution: "MIT",
-      year: 2025,
-      peerReviewed: true,
-    },
-    {
-      id: "3",
-      title: "Foundations of Modern Jurisprudence and Public Law",
-      slug: "foundations-modern-jurisprudence-public-law",
-      cover_url: null,
-      genre: "Law",
-      author: "Justice Eleanor Vance",
-      doi: "10.1093/acprof:oso/9780199",
-      isbn: "978-0-19-923456-7",
-      publisher: "Cambridge University Press OA",
-      institution: "Cambridge Law Review",
-      year: 2023,
       peerReviewed: true,
     },
   ];
@@ -200,11 +223,19 @@ export default function AcademicLibraryPage() {
                 >
                   <FileText className="w-3.5 h-3.5" /> Cite
                 </Button>
-                <Link href={`/read/${book.slug}`} className="flex-1">
-                  <Button size="sm" className="w-full rounded-full text-xs gap-1.5 py-4 font-bold">
-                    <BookOpen className="w-3.5 h-3.5" /> Read Online
-                  </Button>
-                </Link>
+                {book.provider === 'OpenStax' || book.providerUrl || (book.slug && book.slug.includes('physics')) ? (
+                  <a href={book.providerUrl || `https://openstax.org/books/${book.slug}`} target="_blank" rel="noreferrer" className="flex-1">
+                    <Button size="sm" className="w-full rounded-full text-xs gap-1.5 py-4 font-bold bg-blue-600 hover:bg-blue-500 text-white">
+                      <ExternalLink className="w-3.5 h-3.5" /> View Reader
+                    </Button>
+                  </a>
+                ) : (
+                  <Link href={`/read/${book.slug}`} className="flex-1">
+                    <Button size="sm" className="w-full rounded-full text-xs gap-1.5 py-4 font-bold">
+                      <BookOpen className="w-3.5 h-3.5" /> Read Online
+                    </Button>
+                  </Link>
+                )}
               </div>
             </Card>
           ))}

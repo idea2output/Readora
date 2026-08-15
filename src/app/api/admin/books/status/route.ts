@@ -37,10 +37,10 @@ export async function POST(request: Request) {
     if (action === 'update_status' && status) {
       await supabase
         .from('books')
-        .update({ admin_status: status, status: status === 'blocked' ? 'draft' : 'published' })
+        .update({ admin_status: status, status: status })
         .eq('id', bookId);
 
-      const auditAction = status === 'blocked' ? 'BOOK_BLOCKED' : 'BOOK_PUBLISHED';
+      const auditAction = status === 'published' ? 'BOOK_PUBLISHED' : (status === 'blocked' || status === 'rejected' ? 'BOOK_BLOCKED' : 'BOOK_STATUS_UPDATED');
       await logAuditEvent(auditAction as any, 'book', bookId, { admin_status: status });
       return NextResponse.json({ success: true, message: `Book status changed to ${status}` });
     }

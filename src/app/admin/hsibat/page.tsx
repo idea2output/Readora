@@ -3,13 +3,15 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Download, RefreshCw, CheckCircle2, Clock, BookOpen, Sparkles, Layers, Library, Lock, KeyRound, Settings2, Cpu, Save, ShieldAlert, Users, ShieldCheck, FileText, Ban, Trash2, ToggleLeft, ToggleRight, CreditCard, Building2, History, Globe, Play, Pause, Terminal, AlertCircle } from "lucide-react";
+import { Search, Download, RefreshCw, CheckCircle2, Clock, BookOpen, Sparkles, Layers, Library, Lock, KeyRound, Settings2, Cpu, Save, ShieldAlert, Users, ShieldCheck, FileText, Ban, Trash2, ToggleLeft, ToggleRight, CreditCard, Building2, History, Globe, Play, Pause, Terminal, AlertCircle, GraduationCap, BookOpenText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QuranFoundationAdmin } from "@/components/admin/quran-foundation-admin";
+import { OpenStaxAdmin } from "@/components/admin/openstax-admin";
+import { CommunityAdmin } from "@/components/admin/community-admin";
 
 interface GutendexBook {
   id: number;
@@ -502,14 +504,30 @@ export default function AdminHsibatPage() {
           <TabsTrigger value="audit" className="rounded-full text-xs font-bold gap-1.5">
             <History className="w-3.5 h-3.5" /> Audit Logs
           </TabsTrigger>
+          <TabsTrigger value="openstax" className="rounded-full text-xs font-bold gap-1.5 text-blue-600 dark:text-blue-400">
+            <GraduationCap className="w-3.5 h-3.5" /> OpenStax Provider
+          </TabsTrigger>
+          <TabsTrigger value="community" className="rounded-full text-xs font-bold gap-1.5 text-indigo-600 dark:text-indigo-400">
+            <BookOpenText className="w-3.5 h-3.5" /> Community Moderation
+          </TabsTrigger>
           <TabsTrigger value="settings" className="rounded-full text-xs font-bold gap-1.5">
-            <Settings2 className="w-3.5 h-3.5" /> AI & Settings
+            <Settings2 className="w-3.5 h-3.5" /> Settings
           </TabsTrigger>
         </TabsList>
 
         {/* TAB: QURAN FOUNDATION CONTENT MANAGEMENT */}
         <TabsContent value="quran">
           <QuranFoundationAdmin />
+        </TabsContent>
+
+        {/* TAB: OPENSTAX PROVIDER MANAGEMENT */}
+        <TabsContent value="openstax">
+          <OpenStaxAdmin />
+        </TabsContent>
+
+        {/* TAB: COMMUNITY MODERATION MANAGEMENT */}
+        <TabsContent value="community">
+          <CommunityAdmin />
         </TabsContent>
 
         {/* TAB 1: INGESTION & BOOK ADMINISTRATION */}
@@ -1139,112 +1157,15 @@ export default function AdminHsibatPage() {
                   </Button>
                 </div>
 
-                {/* Active AI Provider */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-foreground">
-                    Primary AI Model Provider
-                  </label>
-                  <div className="grid grid-cols-3 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setAiProvider("openai")}
-                      className={`p-4 rounded-2xl border text-center transition-all ${
-                        aiProvider === "openai" ? "border-primary bg-primary/10 font-bold" : "hover:bg-muted"
-                      }`}
-                    >
-                      OpenAI (GPT-4o)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAiProvider("anthropic")}
-                      className={`p-4 rounded-2xl border text-center transition-all ${
-                        aiProvider === "anthropic" ? "border-primary bg-primary/10 font-bold" : "hover:bg-muted"
-                      }`}
-                    >
-                      Anthropic Claude
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAiProvider("gemini")}
-                      className={`p-4 rounded-2xl border text-center transition-all ${
-                        aiProvider === "gemini" ? "border-primary bg-primary/10 font-bold" : "hover:bg-muted"
-                      }`}
-                    >
-                      Google Gemini
-                    </button>
+                {/* Platform Infrastructure Notice */}
+                <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs space-y-2">
+                  <div className="font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4" /> Academic &amp; Rights Governance Active
                   </div>
-                </div>
-
-                {/* API Keys Inputs */}
-                <div className="space-y-4 pt-2">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground">
-                      OpenAI API Key (`sk-...`)
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder="sk-proj-..."
-                      value={openaiKey}
-                      onChange={(e) => setOpenaiKey(e.target.value)}
-                      className="rounded-xl font-mono text-xs py-5"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground">
-                      Anthropic Claude API Key (`sk-ant-...`)
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder="sk-ant-..."
-                      value={anthropicKey}
-                      onChange={(e) => setAnthropicKey(e.target.value)}
-                      className="rounded-xl font-mono text-xs py-5"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground">
-                      Google Gemini API Key (`AIzaSy...`)
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder="AIzaSy..."
-                      value={geminiKey}
-                      onChange={(e) => setGeminiKey(e.target.value)}
-                      className="rounded-xl font-mono text-xs py-5"
-                    />
-                  </div>
-                </div>
-
-                {/* Chunker & Quota Settings */}
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground">
-                      Semantic Chunk Size (Tokens)
-                    </label>
-                    <Input
-                      type="number"
-                      value={chunkSize}
-                      onChange={(e) => setChunkSize(e.target.value)}
-                      className="rounded-xl py-5"
-                    />
-                    <p className="text-[10px] text-muted-foreground">Target size per vector chunk (Recommended: 500 - 1000).</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground">
-                      Daily User AI Quota (Queries/Day)
-                    </label>
-                    <Input
-                      type="number"
-                      value={userQuota}
-                      onChange={(e) => setUserQuota(e.target.value)}
-                      className="rounded-xl py-5"
-                    />
-                    <p className="text-[10px] text-muted-foreground">Maximum Ask-the-Book queries allowed per user per day.</p>
-                  </div>
-                </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Literary Harbour operates under 0 AI architecture. Academic Community discussions, OpenStax textbook indexing, and rights governance function directly via PostgreSQL/Supabase full-text search and human moderation.
+                  </p>
+              </div>
 
                 {settingsMsg && (
                   <div className="p-4 rounded-xl text-xs font-semibold bg-muted text-center">

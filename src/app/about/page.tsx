@@ -3,8 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { BookOpen, Globe2, Heart, ShieldCheck } from 'lucide-react';
 
 export const metadata = {
-  title: 'About | Readora',
-  description: 'Learn about Readora, the public digital library providing access to copyright-free literature for everyone.',
+  title: 'About | Literary Harbour',
+  description: 'Learn about Literary Harbour — Global Open Digital Library. Knowledge Without Borders.',
 };
 
 export default function AboutPage() {
@@ -13,13 +13,13 @@ export default function AboutPage() {
       {/* Hero Section */}
       <div className="text-center space-y-4 max-w-3xl mx-auto">
         <Badge className="rounded-full px-4 py-1 bg-primary/10 text-primary border-0 font-semibold">
-          Open Public Domain Library
+          Global Open Digital Library
         </Badge>
         <h1 className="font-serif text-4xl md:text-6xl font-bold tracking-tight">
-          Literature Free for Everyone, Everywhere.
+          Knowledge Without Borders.
         </h1>
         <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
-          Readora is built on a simple belief: world literature, historical wisdom, and sacred texts belong to human history and should be accessible to all without paywalls or subscription barriers.
+          Literary Harbour is built on a simple belief: world literature, peer-reviewed academic textbooks, historical wisdom, and sacred manuscripts belong to human history and should be accessible to all without paywalls or subscription barriers.
         </p>
       </div>
 

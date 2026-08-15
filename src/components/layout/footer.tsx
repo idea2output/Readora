@@ -9,21 +9,21 @@ export function Footer() {
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center space-x-2">
               <Anchor className="w-5 h-5 text-primary" />
-              <span className="font-serif font-bold text-base text-foreground">Literary Harbor</span>
+              <span className="font-serif font-bold text-base text-foreground">Literary Harbour</span>
             </div>
             <p className="text-[11px] leading-relaxed">
-              A global, rights-aware digital library providing lawful access to public-domain literature, open-access academic books, and open educational resources.
+              Knowledge Without Borders. A global, open digital library providing access to public-domain literature, open-access academic books, and open educational resources.
             </p>
           </div>
 
           <div className="space-y-2">
-            <h4 className="font-bold text-xs uppercase tracking-wider text-foreground">Library & Academic</h4>
+            <h4 className="font-bold text-xs uppercase tracking-wider text-foreground font-serif">Library &amp; Community</h4>
             <ul className="space-y-1.5 text-[11px]">
-              <li><Link href="/catalog" className="hover:underline">Browse Catalog</Link></li>
-              <li><Link href="/academic" className="hover:underline">Academic Library</Link></li>
-              <li><Link href="/sacred-texts" className="hover:underline text-amber-600 dark:text-amber-400 font-bold">Sacred Texts</Link></li>
-              <li><Link href="/collections" className="hover:underline">Classics & Literature</Link></li>
-              <li><Link href="/request" className="hover:underline text-indigo-600 dark:text-indigo-400 font-bold">Request a Book</Link></li>
+              <li><Link href="/catalog" className="hover:underline">Browse Library</Link></li>
+              <li><Link href="/academic" className="hover:underline">Academic Books</Link></li>
+              <li><Link href="/community" className="hover:underline text-indigo-600 dark:text-indigo-400 font-bold">Academic Community</Link></li>
+              <li><Link href="/sacred-texts" className="hover:underline text-amber-600 dark:text-amber-400 font-bold">Religious Texts</Link></li>
+              <li><Link href="/collections" className="hover:underline">Collections</Link></li>
             </ul>
           </div>
 

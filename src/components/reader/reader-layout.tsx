@@ -19,8 +19,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { AiPanel } from '@/components/reader/ai-panel';
-import { PassageExplainer } from '@/components/reader/passage-explainer';
 import { QuranAudioPlayer } from '@/components/quran/quran-audio-player';
 
 interface ReaderLayoutProps {
@@ -293,25 +291,16 @@ export default function ReaderLayout({
         </div>
       </main>
 
-      {/* Sacred Text AI Firewall Badge */}
-      {book?.content_domain === 'SACRED_TEXT' || book?.ai_enabled === false || isQuran ? (
-        <div className="fixed bottom-6 right-6 z-40 bg-amber-950/90 text-amber-200 border border-amber-500/40 text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 backdrop-blur">
-          <ShieldCheck className="w-4 h-4 text-amber-400" />
-          <span>Sacred Text — Permanent AI Firewall Active</span>
-        </div>
-      ) : (
-        <>
-          <AiPanel
-            book={book}
-            currentChapter={currentChapter}
-            onNavigateToChapter={(chapterId) => {
-              const idx = chapters.findIndex(c => c.id === chapterId);
-              if (idx !== -1) setCurrentChapterIdx(idx);
-            }}
-          />
-          <PassageExplainer bookTitle={book.title} />
-        </>
-      )}
+      {/* Academic Community Link Button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <Link 
+          href={`/community/questions?book_id=${book?.id || ''}&chapter_id=${currentChapter?.id || ''}`}
+          className="bg-primary text-primary-foreground font-medium text-xs px-4 py-2.5 rounded-full shadow-xl flex items-center gap-2 hover:opacity-90 transition-all border border-primary/30"
+        >
+          <BookOpenText className="w-4 h-4" />
+          <span>Discuss in Community</span>
+        </Link>
+      </div>
 
       {/* CSS overrides for the dynamic reader content */}
       <style dangerouslySetInnerHTML={{__html: `

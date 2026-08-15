@@ -268,6 +268,8 @@ export async function getBookBySlug(slug: string) {
       .select(`
         *,
         authors ( name, slug, biography ),
+        book_rights ( source_id, rights_status, license_id, attribution_text, host_allowed, download_allowed ),
+        academic_metadata ( publisher, subject_discipline, isbn, open_access_status ),
         book_categories (
           categories ( name, slug )
         )

@@ -101,10 +101,10 @@ export function FullHeroCarousel({ totalBooksCount }: FullHeroCarouselProps) {
               {/* Headline */}
               <div className="space-y-4 max-w-4xl">
                 <h2 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-foreground leading-tight">
-                  Literary Harbor
+                  Literary Harbour
                 </h2>
                 <p className="max-w-3xl text-muted-foreground text-lg sm:text-xl md:text-2xl font-normal leading-relaxed">
-                  Preserving global literature, peer-reviewed monographs, open textbooks, and sacred manuscripts under verified rights governance.
+                  Knowledge Without Borders. Preserving global literature, peer-reviewed monographs, open textbooks, and sacred manuscripts.
                 </p>
               </div>
 

@@ -123,17 +123,7 @@ export function DialogHeader({
   )
 }
 
-export function DialogFooter({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-4",
-        className
-      )}
-      {...props}
-    />
-  )
+export function DialogTrigger({ children, onClick, ...props }: any) {
+  return React.isValidElement(children) ? React.cloneElement(children as React.ReactElement<any>, { onClick, ...props }) : <button onClick={onClick} {...props}>{children}</button>;
 }
+
