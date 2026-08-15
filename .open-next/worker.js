@@ -20,9 +20,16 @@ export default {
                 return response;
             }
             const url = new URL(request.url);
-            if (env && env.ASSETS && (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/favicon.ico"))) {
-                const assetResp = await env.ASSETS.fetch(request);
-                if (assetResp.status !== 404) return assetResp;
+            if (env && env.ASSETS && (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/_next/data/") || url.pathname.startsWith("/favicon.ico") || url.pathname.match(/\.(css|js|woff2?|png|jpg|jpeg|gif|svg|ico)$/))) {
+                try {
+                    const assetReq = new Request(url.toString(), { method: "GET", headers: request.headers });
+                    const assetResp = await env.ASSETS.fetch(assetReq);
+                    if (assetResp && assetResp.status !== 404) {
+                        return assetResp;
+                    }
+                } catch (e) {
+                    console.error("ASSETS fetch error:", e);
+                }
             }
             // Serve images in development.
             // Note: "/cdn-cgi/image/..." requests do not reach production workers.

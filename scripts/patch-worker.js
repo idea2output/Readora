@@ -47,9 +47,20 @@ patchFile(
   'var path2=require("path"),mod3=require("module");mod3.prototype=mod3.prototype||{require:function(r){return require(r);}};var originalRequire=mod3.prototype.require'
 );
 
-// 3. Serve static CSS and JS assets directly from Cloudflare ASSETS binding
+// 3. Directly serve static assets (/_next/static/*, fonts, images, css, js) from Cloudflare ASSETS binding
 patchFile(
   workerPath,
   'const url = new URL(request.url);',
-  'const url = new URL(request.url);\n            if (env && env.ASSETS && (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/favicon.ico"))) {\n                const assetResp = await env.ASSETS.fetch(request);\n                if (assetResp.status !== 404) return assetResp;\n            }'
+  `const url = new URL(request.url);
+            if (env && env.ASSETS && (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/_next/data/") || url.pathname.startsWith("/favicon.ico") || url.pathname.match(/\\.(css|js|woff2?|png|jpg|jpeg|gif|svg|ico)$/))) {
+                try {
+                    const assetReq = new Request(url.toString(), { method: "GET", headers: request.headers });
+                    const assetResp = await env.ASSETS.fetch(assetReq);
+                    if (assetResp && assetResp.status !== 404) {
+                        return assetResp;
+                    }
+                } catch (e) {
+                    console.error("ASSETS fetch error:", e);
+                }
+            }`
 );
