@@ -22,26 +22,50 @@ export function LanguageSelector() {
   const [enabledCodes, setEnabledCodes] = useState<string[]>(TOP_10_LANGUAGES.map(l => l.code));
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const scriptLoadedRef = useRef(false);
 
-  // Load enabled languages from Admin settings / localStorage
+  // Helper to completely erase google translate cookies
+  const clearTranslateCookie = () => {
+    if (typeof window === "undefined") return;
+    const domain = window.location.hostname;
+    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`;
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain}`;
+  };
+
+  // 1. Initial sync with explicit user preference in localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("enabled_website_languages");
-      if (saved) {
-        const parsed = JSON.parse(saved);
+      const savedAdminLangs = localStorage.getItem("enabled_website_languages");
+      if (savedAdminLangs) {
+        const parsed = JSON.parse(savedAdminLangs);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setEnabledCodes(parsed);
         }
       }
+
+      const explicitUserLang = localStorage.getItem("user_selected_language");
+      if (explicitUserLang && explicitUserLang !== "en") {
+        setSelectedLang(explicitUserLang);
+      } else {
+        // Enforce English as default and delete leftover auto-translate cookies
+        setSelectedLang("en");
+        clearTranslateCookie();
+      }
     } catch (_) {}
   }, []);
 
-  // Filter languages to only display admin-enabled languages
   const visibleLanguages = TOP_10_LANGUAGES.filter(l => enabledCodes.includes(l.code));
 
-  // Load Google Translate script dynamically
+  // 2. Load Google Translate script only when user explicitly chose a non-English language
   useEffect(() => {
-    if (document.getElementById("google-translate-script")) return;
+    const userLang = localStorage.getItem("user_selected_language");
+    if (!userLang || userLang === "en") {
+      return;
+    }
+
+    if (scriptLoadedRef.current || document.getElementById("google-translate-script")) return;
+    scriptLoadedRef.current = true;
 
     const addScript = document.createElement("script");
     addScript.id = "google-translate-script";
@@ -53,15 +77,15 @@ export function LanguageSelector() {
       new (window as any).google.translate.TranslateElement(
         {
           pageLanguage: "en",
-          includedLanguages: visibleLanguages.map(l => l.code).join(","),
+          includedLanguages: TOP_10_LANGUAGES.map(l => l.code).join(","),
           autoDisplay: false,
         },
         "google_translate_element"
       );
     };
-  }, [visibleLanguages]);
+  }, [selectedLang]);
 
-  // Continuously remove Google Translate top banner & enforce body top 0px silently
+  // 3. Continuously clean up Google Translate banner/iframe styling
   useEffect(() => {
     const removeGoogleBanner = () => {
       const banner = document.querySelector(".goog-te-banner-frame") as HTMLElement;
@@ -75,11 +99,11 @@ export function LanguageSelector() {
       }
     };
 
-    const interval = setInterval(removeGoogleBanner, 200);
+    const interval = setInterval(removeGoogleBanner, 300);
     return () => clearInterval(interval);
   }, []);
 
-  // Close dropdown on click outside
+  // 4. Close dropdown on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -91,19 +115,64 @@ export function LanguageSelector() {
   }, []);
 
   const changeLanguage = (langCode: string) => {
-    setSelectedLang(langCode);
     setIsOpen(false);
     
-    // Trigger Google Translate select change via cookie / iframe
-    const selectElem = document.querySelector(".goog-te-combo") as HTMLSelectElement;
-    if (selectElem) {
-      selectElem.value = langCode;
-      selectElem.dispatchEvent(new Event("change"));
+    if (langCode === "en") {
+      setSelectedLang("en");
+      localStorage.setItem("user_selected_language", "en");
+      clearTranslateCookie();
+
+      const selectElem = document.querySelector(".goog-te-combo") as HTMLSelectElement;
+      if (selectElem) {
+        selectElem.value = "en";
+        selectElem.dispatchEvent(new Event("change"));
+      }
+      window.location.reload();
+      return;
+    }
+
+    setSelectedLang(langCode);
+    localStorage.setItem("user_selected_language", langCode);
+
+    if (!document.getElementById("google-translate-script")) {
+      const addScript = document.createElement("script");
+      addScript.id = "google-translate-script";
+      addScript.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      addScript.async = true;
+      document.body.appendChild(addScript);
+
+      (window as any).googleTranslateElementInit = () => {
+        new (window as any).google.translate.TranslateElement(
+          {
+            pageLanguage: "en",
+            includedLanguages: TOP_10_LANGUAGES.map(l => l.code).join(","),
+            autoDisplay: false,
+          },
+          "google_translate_element"
+        );
+
+        setTimeout(() => {
+          document.cookie = `googtrans=/en/${langCode}; path=/; domain=${window.location.hostname}`;
+          document.cookie = `googtrans=/en/${langCode}; path=/;`;
+          const selectElem = document.querySelector(".goog-te-combo") as HTMLSelectElement;
+          if (selectElem) {
+            selectElem.value = langCode;
+            selectElem.dispatchEvent(new Event("change"));
+          } else {
+            window.location.reload();
+          }
+        }, 300);
+      };
     } else {
-      // Fallback via google translate cookie
       document.cookie = `googtrans=/en/${langCode}; path=/; domain=${window.location.hostname}`;
       document.cookie = `googtrans=/en/${langCode}; path=/;`;
-      window.location.reload();
+      const selectElem = document.querySelector(".goog-te-combo") as HTMLSelectElement;
+      if (selectElem) {
+        selectElem.value = langCode;
+        selectElem.dispatchEvent(new Event("change"));
+      } else {
+        window.location.reload();
+      }
     }
   };
 
@@ -113,7 +182,6 @@ export function LanguageSelector() {
 
   return (
     <div className="relative inline-block" ref={dropdownRef}>
-      {/* Hidden Google Translate element mount target */}
       <div id="google_translate_element" className="hidden opacity-0 pointer-events-none w-0 h-0 overflow-hidden" />
 
       <Button
