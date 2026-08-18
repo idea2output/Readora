@@ -47,6 +47,14 @@
       "namedRegex": "^/categories/(?<nxtPslug>[^/]+?)(?:/)?$"
     },
     {
+      "page": "/community/questions/[id]",
+      "regex": "^/community/questions/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/community/questions/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/read/[slug]",
       "regex": "^/read/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -143,6 +151,12 @@
       "namedRegex": "^/api/admin/books/sync(?:/)?$"
     },
     {
+      "page": "/api/admin/providers/openstax/sync",
+      "regex": "^/api/admin/providers/openstax/sync(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/providers/openstax/sync(?:/)?$"
+    },
+    {
       "page": "/api/admin/quran/resources",
       "regex": "^/api/admin/quran/resources(?:/)?$",
       "routeKeys": {},
@@ -161,34 +175,34 @@
       "namedRegex": "^/api/admin/users(?:/)?$"
     },
     {
-      "page": "/api/ai/ask",
-      "regex": "^/api/ai/ask(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/ai/ask(?:/)?$"
-    },
-    {
-      "page": "/api/ai/characters",
-      "regex": "^/api/ai/characters(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/ai/characters(?:/)?$"
-    },
-    {
-      "page": "/api/ai/explain",
-      "regex": "^/api/ai/explain(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/ai/explain(?:/)?$"
-    },
-    {
-      "page": "/api/ai/summary",
-      "regex": "^/api/ai/summary(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/ai/summary(?:/)?$"
-    },
-    {
       "page": "/api/books/request",
       "regex": "^/api/books/request(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/books/request(?:/)?$"
+    },
+    {
+      "page": "/api/community/answers",
+      "regex": "^/api/community/answers(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/community/answers(?:/)?$"
+    },
+    {
+      "page": "/api/community/questions",
+      "regex": "^/api/community/questions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/community/questions(?:/)?$"
+    },
+    {
+      "page": "/api/community/report",
+      "regex": "^/api/community/report(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/community/report(?:/)?$"
+    },
+    {
+      "page": "/api/community/vote",
+      "regex": "^/api/community/vote(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/community/vote(?:/)?$"
     },
     {
       "page": "/api/geo/check",
@@ -231,6 +245,18 @@
       "regex": "^/collections(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/collections(?:/)?$"
+    },
+    {
+      "page": "/community",
+      "regex": "^/community(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/community(?:/)?$"
+    },
+    {
+      "page": "/community/questions",
+      "regex": "^/community/questions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/community/questions(?:/)?$"
     },
     {
       "page": "/contributors",

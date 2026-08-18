@@ -362,12 +362,25 @@ export default function AdminHsibatPage() {
     }
   };
 
+  const isGutenbergBook = (b: any) => {
+    if (
+      b.source_id === "openstax" ||
+      b.source_url?.includes("openstax.org") ||
+      b.slug?.includes("openstax") ||
+      b.genre === "Sacred Texts"
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   const handleStartAutoSync = async () => {
     if (autoSyncRunning) return;
 
-    const targetBooks = localBooks.filter(b => forceReSyncAll || (b.chapterCount === undefined || b.chapterCount <= 1));
+    const gutenbergBooks = localBooks.filter(isGutenbergBook);
+    const targetBooks = gutenbergBooks.filter(b => forceReSyncAll || (b.chapterCount === undefined || b.chapterCount <= 1));
     if (targetBooks.length === 0) {
-      addAutoSyncLog("ℹ️ No unsynced books found in catalog.");
+      addAutoSyncLog("ℹ️ No unsynced Gutenberg books found in catalog.");
       return;
     }
 
@@ -698,10 +711,10 @@ export default function AdminHsibatPage() {
                   {/* Unsynced Counter Stats */}
                   <div className="grid grid-cols-2 gap-2 text-center text-xs">
                     <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold">
-                      {localBooks.filter(b => (b.chapterCount === undefined || b.chapterCount <= 1)).length} Unsynced Books
+                      {localBooks.filter(b => isGutenbergBook(b) && (b.chapterCount === undefined || b.chapterCount <= 1)).length} Unsynced Gutenberg Books
                     </div>
                     <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold">
-                      {localBooks.filter(b => b.chapterCount && b.chapterCount > 1).length} Fully Synced
+                      {localBooks.filter(b => isGutenbergBook(b) && b.chapterCount && b.chapterCount > 1).length} Fully Synced
                     </div>
                   </div>
 

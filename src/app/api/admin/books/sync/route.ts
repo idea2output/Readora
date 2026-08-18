@@ -148,7 +148,10 @@ export async function POST(request: Request) {
 
     const { data: book, error: fetchErr } = await supabase
       .from('books')
-      .select('id, title, source_url, slug')
+      .select(`
+        id, title, source_url, slug, genre,
+        book_rights ( source_id )
+      `)
       .eq('id', bookId)
       .single();
 
@@ -156,6 +159,16 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Book not found' },
         { status: 404 }
+      );
+    }
+
+    const rightsRecord = Array.isArray(book.book_rights) ? book.book_rights[0] : book.book_rights;
+    const sourceId = rightsRecord?.source_id;
+
+    if (sourceId === 'openstax' || book.source_url?.includes('openstax.org') || book.slug?.includes('openstax')) {
+      return NextResponse.json(
+        { error: 'OpenStax books use the external Link/Integrate model and do not support Gutenberg text downloading.' },
+        { status: 400 }
       );
     }
 

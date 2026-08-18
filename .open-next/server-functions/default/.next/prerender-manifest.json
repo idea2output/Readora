@@ -34,7 +34,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 28462,
+      "htmlSize": 28172,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -62,7 +62,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 37498,
+      "htmlSize": 37292,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -90,7 +90,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 46664,
+      "htmlSize": 49602,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -118,7 +118,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 31509,
+      "htmlSize": 31327,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -146,7 +146,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 31294,
+      "htmlSize": 31004,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -170,11 +170,67 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/community": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 74976,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/community",
+      "dataRoute": "/community.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/community/questions": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 36233,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/community/questions",
+      "dataRoute": "/community/questions.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/contributors": {
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 72014,
+      "htmlSize": 71724,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -234,7 +290,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 28891,
+      "htmlSize": 28653,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -262,7 +318,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 36442,
+      "htmlSize": 36152,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -290,7 +346,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 43587,
+      "htmlSize": 36715,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -318,7 +374,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 34102,
+      "htmlSize": 33812,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -346,7 +402,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 40042,
+      "htmlSize": 39752,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -374,7 +430,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 93858,
+      "htmlSize": 93568,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -402,7 +458,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 35044,
+      "htmlSize": 34754,
       "experimentalBypassFor": [
         {
           "type": "header",
