@@ -50,8 +50,8 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
   let visibleReciters: any[] = [];
   let visibleTafsirs: any[] = [];
 
-  // Live Quran Foundation API v4 Integration for all Islamic & Sacred Works
-  const isIslamicOrSacredWork =
+  // Live Quran Foundation API v4 Integration strictly for Islamic works
+  const isIslamicWork =
     resolvedParams.slug === 'holy-quran-arabic' ||
     resolvedParams.slug?.includes('quran') ||
     resolvedParams.slug?.includes('tafsir') ||
@@ -61,10 +61,9 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
     resolvedParams.slug?.includes('salihin') ||
     resolvedParams.slug?.includes('muwatta') ||
     resolvedParams.slug?.includes('nawawi') ||
-    book.genre === 'Sacred Texts' ||
     book.source_id === 'quran-foundation';
 
-  if (isIslamicOrSacredWork) {
+  if (isIslamicWork) {
     try {
       const surahs = await getQuranFoundationSurahs();
       visibleTranslations = await getVisibleQuranResources("translation");

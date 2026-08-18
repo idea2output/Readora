@@ -82,6 +82,21 @@ export function LanguageSelector() {
         },
         "google_translate_element"
       );
+
+      document.cookie = `googtrans=/en/${userLang}; path=/;`;
+      document.cookie = `googtrans=/en/${userLang}; path=/; domain=${window.location.hostname}`;
+
+      const triggerCombo = () => {
+        const selectElem = document.querySelector(".goog-te-combo") as HTMLSelectElement;
+        if (selectElem) {
+          selectElem.value = userLang;
+          selectElem.dispatchEvent(new Event("change"));
+        }
+      };
+
+      setTimeout(triggerCombo, 300);
+      setTimeout(triggerCombo, 800);
+      setTimeout(triggerCombo, 1500);
     };
   }, [selectedLang]);
 
