@@ -72,12 +72,12 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
 
       if (surahs && surahs.length > 0) {
         const quranFoundationChapters = [];
-        for (const surah of surahs.slice(0, 10)) {
+        for (const surah of surahs) {
           const verses = await getQuranFoundationVerses(surah.id);
           const versesHtml = verses
             .map(
               (v: any) =>
-                `<span id="verse-${surah.id}-${v.verse_key.split(':')[1]}" class="inline-block mx-1 quran-text notranslate p-1 rounded-xl transition-all" lang="ar" dir="rtl" translate="no">${v.text_uthmani}</span> <span class="inline-flex items-center justify-center w-7 h-7 text-xs rounded-full border border-amber-500/40 text-amber-900 dark:text-amber-300 mx-1 font-mono font-bold">﴿${v.verse_key.split(':')[1]}﴾</span>`
+                `<div id="verse-block-${surah.id}-${v.verse_key.split(':')[1]}" class="my-4 p-3 rounded-2xl border border-transparent hover:border-amber-500/30 transition-all space-y-2"><div class="text-right" dir="rtl"><span id="verse-${surah.id}-${v.verse_key.split(':')[1]}" class="inline-block mx-1 quran-text notranslate p-1 rounded-xl transition-all" lang="ar" dir="rtl" translate="no">${v.text_uthmani}</span> <span class="inline-flex items-center justify-center w-7 h-7 text-xs rounded-full border border-amber-500/40 text-amber-900 dark:text-amber-300 mx-1 font-mono font-bold">﴿${v.verse_key.split(':')[1]}﴾</span></div><div id="translation-${surah.id}-${v.verse_key.split(':')[1]}" class="quran-translation-container text-left text-sm text-muted-foreground font-medium pt-1 border-t border-border/40 mt-2"></div></div>`
             )
             .join(' ');
 
@@ -94,7 +94,7 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
                   Sourced Directly from Quran Foundation (Quran.com) API • Official QPC Hafs Font • ${book.title}
                 </div>
                 ${surah.bismillah_pre ? '<p class="quran-text text-2xl text-amber-900 dark:text-amber-200 font-extrabold text-center mb-6 notranslate" lang="ar" dir="rtl" translate="no">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>' : ''}
-                <div class="leading-[2.4] tracking-wide text-foreground">
+                <div class="space-y-4">
                   ${versesHtml}
                 </div>
               </div>

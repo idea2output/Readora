@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 
 import { QuranAudioPlayer } from '@/components/quran/quran-audio-player';
+import { ensureLanguageFontLoaded } from '@/lib/fonts/auto-font-loader';
 
 interface ReaderLayoutProps {
   book: any;
@@ -92,6 +93,47 @@ export default function ReaderLayout({
       activeElem.classList.add("quran-active-verse", "bg-amber-500/20", "ring-2", "ring-amber-500");
     }
   }, [activeVerseKey]);
+
+  // Fetch and inject verse translation text when selectedTranslation or chapter changes
+  useEffect(() => {
+    if (!selectedTranslation || !currentChapter) return;
+
+    const chNum = currentChapter.sequence_number || currentChapterIdx + 1;
+    const transId = selectedTranslation.qf_id || selectedTranslation.id || "131";
+    const langCode = selectedTranslation.language_code?.toLowerCase() || "en";
+    ensureLanguageFontLoaded(langCode);
+
+    // Clear existing translations
+    document.querySelectorAll(".quran-translation-container").forEach(el => {
+      el.innerHTML = "";
+    });
+
+    fetch(`/api/quran?action=translation&id=${transId}&chapter=${chNum}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.translations && Array.isArray(data.translations)) {
+          data.translations.forEach((t: any) => {
+            const vKey = t.verse_key;
+            if (!vKey) return;
+            const verseNum = vKey.split(':')[1];
+            const targetElem = document.getElementById(`translation-${chNum}-${verseNum}`);
+            if (targetElem) {
+              const cleanText = t.text.replace(/<sup[^>]*>.*?<\/sup>/g, '');
+              const isUrdu = langCode === 'ur' || selectedTranslation.name?.toLowerCase().includes('urdu') || selectedTranslation.name?.toLowerCase().includes('jalandhari');
+              targetElem.innerHTML = `
+                <div class="p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/10 mt-2">
+                  <span class="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400 block mb-1">${selectedTranslation.name} (${selectedTranslation.language_code})</span>
+                  <p class="quran-translation-text ${isUrdu ? 'lang-ur font-ur text-right font-semibold text-amber-900 dark:text-amber-200 text-lg leading-loose' : 'text-left text-sm text-foreground/90 leading-relaxed'}" ${isUrdu ? 'lang="ur" dir="rtl"' : ''}>
+                    ${cleanText}
+                  </p>
+                </div>
+              `;
+            }
+          });
+        }
+      })
+      .catch(err => console.error("Error loading Quran translation:", err));
+  }, [selectedTranslation, currentChapterIdx, currentChapter]);
 
   // Save progress when chapter changes
   useEffect(() => {

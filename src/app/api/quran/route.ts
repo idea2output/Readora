@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       const chapter = searchParams.get("chapter") || "1";
 
       const res = await fetch(
-        `https://api.quran.com/api/v4/quran/translations/${translationId}`,
+        `https://api.quran.com/api/v4/quran/translations/${translationId}?chapter_number=${chapter}`,
         { next: { revalidate: 86400 } }
       );
       if (!res.ok) {

@@ -1,5 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Gulzar&family=Noto+Sans+Arabic:wght@400;600;700&display=swap');
 @import "tailwindcss";
+
+/* Urdu Language & Urdu Quran Translation Typography */
+.lang-ur,
+.font-ur,
+[lang="ur"],
+:lang(ur) {
+  font-family: 'Noto Nastaliq Urdu', 'Gulzar', 'Noto Sans Arabic', 'Cairo', serif !important;
+  direction: rtl;
+  text-align: right;
+  line-height: 2.2;
+}
 
 /* Cairo Font for Arabic Google Translations & Arabic Language Layouts */
 html[lang="ar"],
