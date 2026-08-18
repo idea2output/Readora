@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import ReaderLayout from '@/components/reader/reader-layout';
 import { getQuranFoundationSurahs, getQuranFoundationVerses } from '@/lib/quran/quran-foundation';
 import { getVisibleQuranResources } from '@/lib/quran/quran-foundation-server';
+import { isMockOrPlaceholderContent, syncGutenbergBookChapters } from '@/lib/gutenberg/sync';
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -63,7 +64,7 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
     book.genre === 'Sacred Texts' ||
     book.source_id === 'quran-foundation';
 
-  if (isIslamicOrSacredWork || finalChapters.length === 0) {
+  if (isIslamicOrSacredWork) {
     try {
       const surahs = await getQuranFoundationSurahs();
       visibleTranslations = await getVisibleQuranResources("translation");
@@ -72,7 +73,6 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
 
       if (surahs && surahs.length > 0) {
         const quranFoundationChapters = [];
-        // Support all 114 Surahs with fallback
         for (const surah of surahs.slice(0, 10)) {
           const verses = await getQuranFoundationVerses(surah.id);
           const versesHtml = verses
@@ -110,24 +110,40 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
     } catch (err) {
       console.error('Quran Foundation API live fetch error:', err);
     }
+  } else {
+    // Check if chapters are empty OR contain mock Latin/placeholder text
+    const hasMockText = finalChapters.length > 0 && isMockOrPlaceholderContent(finalChapters[0]?.content || '');
+
+    if (finalChapters.length === 0 || hasMockText) {
+      // On-demand Gutenberg synchronization
+      const syncedChapters = await syncGutenbergBookChapters(book.id, book.source_url, book.slug);
+      if (syncedChapters && syncedChapters.length > 0) {
+        finalChapters = syncedChapters;
+      }
+    }
   }
 
-  // General Fallback for non-OpenStax books when local chapter content is pending
-  if (finalChapters.length === 0) {
+  // Clean Fallback for non-OpenStax books when text synchronization is pending
+  if (finalChapters.length === 0 || isMockOrPlaceholderContent(finalChapters[0]?.content || '')) {
     const authorName = Array.isArray(book.authors) ? book.authors[0]?.name : book.authors?.name;
     const authorDisplayName = authorName || 'Literary Harbour Open Library';
-    const isQuranText = book.slug?.includes('quran') || book.genre === 'Sacred Texts';
-
-    const provenanceText = isQuranText
-      ? `This authentic edition of <strong>${book.title}</strong> is provided directly by <strong>${authorDisplayName}</strong>. Hosted with 0 AI intervention under Literary Harbor Rights Governance.`
-      : `This open-access edition of <strong>${book.title}</strong> by <strong>${authorDisplayName}</strong> is cataloged under Literary Harbour Rights Governance.`;
 
     finalChapters = [
       {
         id: "default-ch-1",
         sequence_number: 1,
-        title: "Overview",
-        content: `<p class="leading-relaxed text-center">${provenanceText}</p>`
+        title: "Volume Overview",
+        content: `
+          <div class="p-8 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-center space-y-4 max-w-xl mx-auto my-8">
+            <h3 class="font-serif text-xl font-bold text-foreground">${book.title}</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">
+              This open-access edition by <strong>${authorDisplayName}</strong> is cataloged under Literary Harbour Rights Governance.
+            </p>
+            <p class="text-xs text-amber-800 dark:text-amber-300 font-semibold">
+              Full text synchronization for this volume is currently processing from open mirrors. Please check back shortly.
+            </p>
+          </div>
+        `
       }
     ];
   }
