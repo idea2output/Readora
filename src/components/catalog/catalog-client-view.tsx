@@ -46,6 +46,12 @@ export function CatalogClientView({
   const [userTopCats, setUserTopCats] = useState<string[]>([]);
   const [popularityScores, setPopularityScores] = useState<Record<string, number>>({});
   const [showAllGrid, setShowAllGrid] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(50);
+
+  // Reset pagination limit when search query, active category, or view mode changes
+  useEffect(() => {
+    setVisibleCount(50);
+  }, [searchQuery, activeCategory, showAllGrid]);
 
   // Load analytics & recommendations on mount
   const refreshAnalytics = () => {
@@ -257,7 +263,7 @@ export function CatalogClientView({
                 {searchQuery ? `Results for "${searchQuery}"` : activeCategory ? `Category: ${activeCategory}` : "Complete Library Grid"}
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Showing {filteredBooks.length} of {totalCount} titles
+                Showing {Math.min(visibleCount, filteredBooks.length)} of {filteredBooks.length} titles
               </p>
             </div>
             {(searchQuery || activeCategory) && (
@@ -281,50 +287,71 @@ export function CatalogClientView({
               No books matching your query found. Try adjusting your search term or exploring another category!
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-              {filteredBooks.map((book) => (
-                <Link
-                  key={book.id}
-                  href={`/books/${book.slug}`}
-                  onClick={() => trackBookEvent(book.id, "view", book.genre)}
-                >
-                  <Card className="h-full overflow-hidden hover:border-primary/50 hover:shadow-md transition-all rounded-xl group flex flex-col border bg-card">
-                    <div className="aspect-[2/3] relative bg-muted overflow-hidden">
-                      {book.cover_url ? (
-                        <Image
-                          src={book.cover_url}
-                          alt={book.title}
-                          fill
-                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 16vw"
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center p-2 text-center text-muted-foreground font-serif text-xs">
-                          {book.title}
+            <div className="space-y-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+                {filteredBooks.slice(0, visibleCount).map((book) => (
+                  <Link
+                    key={book.id}
+                    href={`/books/${book.slug}`}
+                    onClick={() => trackBookEvent(book.id, "view", book.genre)}
+                  >
+                    <Card className="h-full overflow-hidden hover:border-primary/50 hover:shadow-md transition-all rounded-xl group flex flex-col border bg-card">
+                      <div className="aspect-[2/3] relative bg-muted overflow-hidden">
+                        {book.cover_url ? (
+                          <Image
+                            src={book.cover_url}
+                            alt={book.title}
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 16vw"
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center p-2 text-center text-muted-foreground font-serif text-xs">
+                            {book.title}
+                          </div>
+                        )}
+                      </div>
+                      <CardContent className="p-2.5 flex-1 flex flex-col justify-between space-y-2">
+                        <div>
+                          <h3 className="font-bold text-xs line-clamp-1 group-hover:text-primary transition-colors leading-tight" title={book.title}>
+                            {book.title}
+                          </h3>
+                          <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5" title={book.authors?.name}>
+                            {book.authors?.name || "Unknown Author"}
+                          </p>
                         </div>
-                      )}
-                    </div>
-                    <CardContent className="p-2.5 flex-1 flex flex-col justify-between space-y-2">
-                      <div>
-                        <h3 className="font-bold text-xs line-clamp-1 group-hover:text-primary transition-colors leading-tight" title={book.title}>
-                          {book.title}
-                        </h3>
-                        <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5" title={book.authors?.name}>
-                          {book.authors?.name || "Unknown Author"}
-                        </p>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px] pt-1">
-                        <span className="bg-muted px-1.5 py-0.5 rounded-md text-muted-foreground font-medium truncate max-w-[75px]">
-                          {book.genre || "Classic"}
-                        </span>
-                        <span className="text-primary font-bold group-hover:translate-x-0.5 transition-transform">
-                          Read →
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+                        <div className="flex items-center justify-between text-[10px] pt-1">
+                          <span className="bg-muted px-1.5 py-0.5 rounded-md text-muted-foreground font-medium truncate max-w-[75px]">
+                            {book.genre || "Classic"}
+                          </span>
+                          <span className="text-primary font-bold group-hover:translate-x-0.5 transition-transform">
+                            Read →
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Show More Pagination Button */}
+              {visibleCount < filteredBooks.length && (
+                <div className="flex flex-col items-center justify-center pt-6 space-y-2">
+                  <Button
+                    onClick={() => setVisibleCount((prev) => prev + 50)}
+                    size="lg"
+                    className="rounded-full px-8 font-bold gap-2 text-sm shadow-md hover:shadow-lg transition-all"
+                  >
+                    <span>Show More Books</span>
+                    <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-xs font-mono">
+                      +{Math.min(50, filteredBooks.length - visibleCount)}
+                    </Badge>
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Showing {Math.min(visibleCount, filteredBooks.length)} of {filteredBooks.length} titles
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
