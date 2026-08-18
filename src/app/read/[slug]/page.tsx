@@ -49,8 +49,21 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
   let visibleReciters: any[] = [];
   let visibleTafsirs: any[] = [];
 
-  // Live Quran Foundation API v4 Integration for Quranic reading
-  if (resolvedParams.slug === 'holy-quran-arabic') {
+  // Live Quran Foundation API v4 Integration for all Islamic & Sacred Works
+  const isIslamicOrSacredWork =
+    resolvedParams.slug === 'holy-quran-arabic' ||
+    resolvedParams.slug?.includes('quran') ||
+    resolvedParams.slug?.includes('tafsir') ||
+    resolvedParams.slug?.includes('bukhari') ||
+    resolvedParams.slug?.includes('muslim') ||
+    resolvedParams.slug?.includes('hadith') ||
+    resolvedParams.slug?.includes('salihin') ||
+    resolvedParams.slug?.includes('muwatta') ||
+    resolvedParams.slug?.includes('nawawi') ||
+    book.genre === 'Sacred Texts' ||
+    book.source_id === 'quran-foundation';
+
+  if (isIslamicOrSacredWork || finalChapters.length === 0) {
     try {
       const surahs = await getQuranFoundationSurahs();
       visibleTranslations = await getVisibleQuranResources("translation");
@@ -79,7 +92,7 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
             content: `
               <div dir="rtl" class="text-right space-y-6">
                 <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center text-xs font-bold text-amber-900 dark:text-amber-200 mb-6">
-                  Sourced Directly from Quran Foundation (Quran.com) API • Official QPC Hafs Font
+                  Sourced Directly from Quran Foundation (Quran.com) API • Official QPC Hafs Font • ${book.title}
                 </div>
                 ${surah.bismillah_pre ? '<p class="quran-text text-2xl text-amber-900 dark:text-amber-200 font-extrabold text-center mb-6 notranslate" lang="ar" dir="rtl" translate="no">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>' : ''}
                 <div class="leading-[2.4] tracking-wide text-foreground">
