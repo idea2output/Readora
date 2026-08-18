@@ -253,7 +253,7 @@ export function QuranAudioPlayer({
             className={`rounded-full gap-2 transition-all shadow-sm ${
               isPlaying
                 ? "bg-amber-600 hover:bg-amber-700 text-white animate-pulse"
-                : "border-amber-500/40 text-amber-900 dark:text-amber-300 hover:bg-amber-500/10"
+                : "border-amber-800/40 text-amber-950 dark:text-amber-300 font-bold bg-amber-500/10 hover:bg-amber-500/20"
             }`}
           >
             {isLoading ? (

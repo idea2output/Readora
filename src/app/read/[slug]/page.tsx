@@ -77,7 +77,7 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
           const versesHtml = verses
             .map(
               (v: any) =>
-                `<div id="verse-block-${surah.id}-${v.verse_key.split(':')[1]}" class="my-4 p-3 rounded-2xl border border-transparent hover:border-amber-500/30 transition-all space-y-2"><div class="text-right" dir="rtl"><span id="verse-${surah.id}-${v.verse_key.split(':')[1]}" class="inline-block mx-1 quran-text notranslate p-1 rounded-xl transition-all" lang="ar" dir="rtl" translate="no">${v.text_uthmani}</span> <span class="inline-flex items-center justify-center w-7 h-7 text-xs rounded-full border border-amber-500/40 text-amber-900 dark:text-amber-300 mx-1 font-mono font-bold">﴿${v.verse_key.split(':')[1]}﴾</span></div><div id="translation-${surah.id}-${v.verse_key.split(':')[1]}" class="quran-translation-container text-left text-sm text-muted-foreground font-medium pt-1 border-t border-border/40 mt-2"></div></div>`
+                `<div id="verse-block-${surah.id}-${v.verse_key.split(':')[1]}" class="my-4 p-3.5 rounded-2xl border border-border/40 hover:border-amber-700/40 transition-all space-y-2 bg-background/50"><div class="text-right" dir="rtl"><span id="verse-${surah.id}-${v.verse_key.split(':')[1]}" class="inline-block mx-1 quran-text notranslate p-1 rounded-xl transition-all text-slate-900 dark:text-amber-100" lang="ar" dir="rtl" translate="no">${v.text_uthmani}</span> <span class="inline-flex items-center justify-center w-8 h-8 text-xs rounded-full border border-amber-800/40 text-amber-950 dark:text-amber-200 bg-amber-500/10 mx-1 font-mono font-bold">﴿${v.verse_key.split(':')[1]}﴾</span></div><div id="translation-${surah.id}-${v.verse_key.split(':')[1]}" class="quran-translation-container text-left text-sm text-muted-foreground font-medium pt-1 border-t border-border/40 mt-2"></div></div>`
             )
             .join(' ');
 
@@ -90,10 +90,10 @@ export default async function ReadPage({ params }: { params: Promise<{ slug: str
             title: `Surah ${surah.name_simple} (${surah.name_arabic})`,
             content: `
               <div dir="rtl" class="text-right space-y-6">
-                <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center text-xs font-bold text-amber-900 dark:text-amber-200 mb-6">
+                <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-800/30 text-center text-xs font-bold text-amber-950 dark:text-amber-200 mb-6">
                   Sourced Directly from Quran Foundation (Quran.com) API • Official QPC Hafs Font • ${book.title}
                 </div>
-                ${surah.bismillah_pre ? '<p class="quran-text text-2xl text-amber-900 dark:text-amber-200 font-extrabold text-center mb-6 notranslate" lang="ar" dir="rtl" translate="no">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>' : ''}
+                ${surah.bismillah_pre ? '<p class="quran-text text-3xl md:text-4xl text-amber-950 dark:text-amber-200 font-extrabold text-center mb-8 notranslate" lang="ar" dir="rtl" translate="no">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>' : ''}
                 <div class="space-y-4">
                   ${versesHtml}
                 </div>

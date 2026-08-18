@@ -103,6 +103,27 @@ export default function ReaderLayout({
     const langCode = selectedTranslation.language_code?.toLowerCase() || "en";
     ensureLanguageFontLoaded(langCode);
 
+    const applyTranslations = (translations: any[]) => {
+      if (!Array.isArray(translations)) return;
+      translations.forEach((t: any, idx: number) => {
+        const vKey = t.verse_key || `${chNum}:${idx + 1}`;
+        const verseNum = vKey.includes(':') ? vKey.split(':')[1] : `${idx + 1}`;
+        const targetElem = document.getElementById(`translation-${chNum}-${verseNum}`);
+        if (targetElem) {
+          const cleanText = (t.text || '').replace(/<sup[^>]*>.*?<\/sup>/g, '');
+          const isUrdu = langCode === 'ur' || selectedTranslation.name?.toLowerCase().includes('urdu') || selectedTranslation.name?.toLowerCase().includes('jalandhari');
+          targetElem.innerHTML = `
+            <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-800/20 mt-2.5">
+              <span class="text-[10px] uppercase font-bold text-amber-950 dark:text-amber-300 block mb-1">${selectedTranslation.name} (${selectedTranslation.language_code})</span>
+              <p class="quran-translation-text ${isUrdu ? 'lang-ur font-ur text-right font-bold text-amber-950 dark:text-amber-200 text-lg leading-loose' : 'text-left text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed'}" ${isUrdu ? 'lang="ur" dir="rtl"' : ''}>
+                ${cleanText}
+              </p>
+            </div>
+          `;
+        }
+      });
+    };
+
     // Clear existing translations
     document.querySelectorAll(".quran-translation-container").forEach(el => {
       el.innerHTML = "";
@@ -111,25 +132,11 @@ export default function ReaderLayout({
     fetch(`/api/quran?action=translation&id=${transId}&chapter=${chNum}`)
       .then(res => res.json())
       .then(data => {
-        if (data.translations && Array.isArray(data.translations)) {
-          data.translations.forEach((t: any) => {
-            const vKey = t.verse_key;
-            if (!vKey) return;
-            const verseNum = vKey.split(':')[1];
-            const targetElem = document.getElementById(`translation-${chNum}-${verseNum}`);
-            if (targetElem) {
-              const cleanText = t.text.replace(/<sup[^>]*>.*?<\/sup>/g, '');
-              const isUrdu = langCode === 'ur' || selectedTranslation.name?.toLowerCase().includes('urdu') || selectedTranslation.name?.toLowerCase().includes('jalandhari');
-              targetElem.innerHTML = `
-                <div class="p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/10 mt-2">
-                  <span class="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400 block mb-1">${selectedTranslation.name} (${selectedTranslation.language_code})</span>
-                  <p class="quran-translation-text ${isUrdu ? 'lang-ur font-ur text-right font-semibold text-amber-900 dark:text-amber-200 text-lg leading-loose' : 'text-left text-sm text-foreground/90 leading-relaxed'}" ${isUrdu ? 'lang="ur" dir="rtl"' : ''}>
-                    ${cleanText}
-                  </p>
-                </div>
-              `;
-            }
-          });
+        if (data.translations) {
+          applyTranslations(data.translations);
+          // Re-apply after short frame delay in case DOM was mounting
+          setTimeout(() => applyTranslations(data.translations), 100);
+          setTimeout(() => applyTranslations(data.translations), 300);
         }
       })
       .catch(err => console.error("Error loading Quran translation:", err));
@@ -202,8 +209,8 @@ export default function ReaderLayout({
               {isQuran && visibleTranslations.length > 0 && (
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs border-amber-500/40 text-amber-900 dark:text-amber-300">
-                      <Languages className="w-3.5 h-3.5 text-amber-500" />
+                    <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs border-amber-800/40 text-amber-950 dark:text-amber-300 font-bold bg-amber-500/10 hover:bg-amber-500/20 shadow-sm">
+                      <Languages className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
                       <span className="hidden sm:inline">{selectedTranslation?.name || "Translations"}</span>
                     </Button>
                   </PopoverTrigger>
@@ -215,11 +222,11 @@ export default function ReaderLayout({
                           key={t.id}
                           onClick={() => setSelectedTranslation(t)}
                           className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-colors ${
-                            selectedTranslation?.id === t.id ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold" : "hover:bg-accent"
+                            selectedTranslation?.id === t.id ? "bg-amber-500/20 text-amber-950 dark:text-amber-200 font-bold" : "hover:bg-accent"
                           }`}
                         >
                           <span className="truncate">{t.name}</span>
-                          <Badge variant="outline" className="text-[9px] uppercase">{t.language_code}</Badge>
+                          <Badge variant="outline" className="text-[9px] uppercase border-amber-800/30 text-amber-950 dark:text-amber-300 font-bold">{t.language_code}</Badge>
                         </button>
                       ))}
                     </div>
