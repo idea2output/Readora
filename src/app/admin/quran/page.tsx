@@ -5,7 +5,12 @@ import { Lock, KeyRound } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { QuranFoundationAdmin } from "@/components/admin/quran-foundation-admin";
+import dynamic from 'next/dynamic';
+
+const QuranFoundationAdmin = dynamic(
+  () => import('@/components/admin/quran-foundation-admin').then((m) => m.QuranFoundationAdmin),
+  { ssr: false, loading: () => <div className="p-8 text-center text-sm font-medium text-muted-foreground">Loading Quran Foundation Admin...</div> }
+);
 
 export default function AdminQuranPage() {
   const [authenticated, setAuthenticated] = useState(false);

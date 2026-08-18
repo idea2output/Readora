@@ -9,9 +9,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { QuranFoundationAdmin } from "@/components/admin/quran-foundation-admin";
-import { OpenStaxAdmin } from "@/components/admin/openstax-admin";
-import { CommunityAdmin } from "@/components/admin/community-admin";
+import dynamic from 'next/dynamic';
+
+const QuranFoundationAdmin = dynamic(
+  () => import('@/components/admin/quran-foundation-admin').then((m) => m.QuranFoundationAdmin),
+  { ssr: false, loading: () => <div className="p-8 text-center text-sm font-medium text-muted-foreground">Loading Quran Foundation Admin...</div> }
+);
+
+const OpenStaxAdmin = dynamic(
+  () => import('@/components/admin/openstax-admin').then((m) => m.OpenStaxAdmin),
+  { ssr: false, loading: () => <div className="p-8 text-center text-sm font-medium text-muted-foreground">Loading OpenStax Admin...</div> }
+);
+
+const CommunityAdmin = dynamic(
+  () => import('@/components/admin/community-admin').then((m) => m.CommunityAdmin),
+  { ssr: false, loading: () => <div className="p-8 text-center text-sm font-medium text-muted-foreground">Loading Community Moderation Admin...</div> }
+);
 
 interface GutendexBook {
   id: number;
